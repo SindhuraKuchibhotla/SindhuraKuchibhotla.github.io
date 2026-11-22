@@ -343,6 +343,60 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
   .score small{display:block;padding-right:48px}
   .score .board span{white-space:nowrap}
 }
+
+/* ===== stage mode: wide, tall windows. The script adds html.stage once the 3D board is running.
+   The chip's lid opens and the floorplan below is pinned exactly on top of the die. ===== */
+html.stage .hero{height:300vh}
+html.stage .fade{display:none}
+html.stage .die{position:relative;z-index:1;margin-top:-200vh;height:200vh;padding:0;background:transparent;pointer-events:none}
+html.stage .die-pin{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:74px 6vw 46px;opacity:0;overflow:hidden;
+  --h2:clamp(28px,min(4.6vw,6.2vh),60px);--fw:min(1000px,88vw,calc((100vh - 232px - 1.05*var(--h2))*1.6))}
+html.stage .die-pin.on{pointer-events:auto}
+html.stage .die .rv{opacity:1;transform:none;transition:none}
+html.stage .die-head{margin:0 auto 44px;position:relative;z-index:1}
+html.stage .die-head h2{font-size:var(--h2);margin-top:10px}
+html.stage .die-head p{margin-top:8px}
+html.stage .floor{flex:none;width:var(--fw);max-width:none;margin:0;padding:clamp(8px,calc(var(--fw)*.016),14px);gap:clamp(6px,calc(var(--fw)*.012),10px);background:none;box-shadow:0 0 0 100vmax rgba(17,22,19,var(--dim,.4))}
+html.stage .floor .blk{padding:clamp(8px,calc(var(--fw)*.016),14px)}
+html.stage .floor .blk b{font-size:clamp(15px,calc(var(--fw)*.03),28px)}
+html.stage .floor .blk span{font-size:clamp(11px,calc(var(--fw)*.0145),12.5px)}
+html.stage .boot{padding-top:12vh}
+
+/* phones: the chip sits above the headline, so the shade comes up from the bottom */
+@media(max-width:600px){
+  .stick:after{background:linear-gradient(0deg,rgba(14,47,38,.95) 0%,rgba(14,47,38,.8) 44%,rgba(14,47,38,0) 72%)}
+}
+
+/* brake sweep chart (FPGA read-more) */
+.sweep{margin:8px 0 6px;position:relative}
+.sweep svg{width:100%;height:auto;display:block;overflow:visible}
+.sweep .ax{font-family:var(--mono);font-size:10.5px;fill:var(--mute)}
+.sweep .gl{stroke:rgba(31,26,21,.1);stroke-width:1}
+.sweep .ln{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.sweep .lab{font-family:var(--mono);font-size:11px;fill:#2e2720}
+.sweep .tip{position:absolute;pointer-events:none;background:#1f1a15;color:#f5eddd;font-family:var(--mono);font-size:11px;line-height:1.5;padding:6px 9px;border-radius:6px;opacity:0;transition:opacity .15s;white-space:nowrap}
+.sweep .tip i{display:inline-block;width:14px;height:2px;vertical-align:3px;margin-right:6px}
+.sweep.sm .ax{font-size:13px}.sweep.sm .lab{font-size:13px}
+.reader .sweep .cap{font-family:var(--sans);font-size:13.5px;color:var(--mute);margin-top:4px;line-height:1.45}
+/* ===== one signal down the page (wide screens; drawn by the script) ===== */
+.sig{position:absolute;left:0;top:0;z-index:0;pointer-events:none;display:none}
+html.sigon .sig{display:block}
+.sig path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.sig .trk{stroke-width:2}
+.sig .halo{stroke-width:8;opacity:.2}
+.sig .core{stroke-width:2.4}
+.sig .stub{stroke-width:2;transition:stroke-dashoffset .45s ease-out}
+.sig .via{stroke-width:1.5;transition:fill .35s,stroke .35s}
+.sig .tap.d .stub{stroke:#f0cf7a}.sig .tap.l .stub{stroke:#b5532a}
+.sig .tap.d .via{fill:#111613;stroke:rgba(212,168,75,.45)}.sig .tap.l .via{fill:#f5eddd;stroke:rgba(31,26,21,.3)}
+.sig .tap.d.on .via{fill:#f0cf7a;stroke:#f0cf7a}.sig .tap.l.on .via{fill:#b5532a;stroke:#b5532a}
+.sig .head.d{fill:#fff3c9}.sig .head.l{fill:#b5532a}
+.sig .glow.d{fill:rgba(240,207,122,.35)}.sig .glow.l{fill:rgba(181,83,42,.25)}
+html.sigon .pin .leg{transition:height .3s,box-shadow .5s,opacity .5s}
+html.sigon .pin:not(.sig-on) .leg{opacity:.4}
+html.sigon .pin.sig-on .leg{box-shadow:0 0 16px rgba(240,207,122,.7)}
+html.sigon .chipbar{transition:color .6s,border-color .6s,box-shadow .6s}
+html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,122,.75);box-shadow:0 0 30px rgba(212,168,75,.22)}
 </style>
 </head>
 <body>
@@ -371,12 +425,13 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
 </section>
 
 <section class="die" id="die">
+  <div class="die-pin" id="diePin">
   <div class="die-head rv">
     <div class="eyebrow">You are now inside the chip</div>
     <h2>Every block is a part of <em>how I work.</em></h2>
     <p>Pick a block, or keep scrolling to boot it up.</p>
   </div>
-  <div class="floor rv">
+  <div class="floor rv" id="floor">
     <a class="blk b1" href="#sense"><div class="id">SENSE · 0x01</div><div><b>Perception</b><br><span>Depth, detection, hyperspectral imaging</span></div></a>
     <a class="blk b2" href="#think"><div class="id">THINK · 0x02</div><div><b>Models</b><br><span>LLMs and RAG in production</span></div></a>
     <a class="blk b3" href="#build"><div class="id">BUILD · 0x03</div><div><b>Hardware</b><br><span>Edge boards, RTL, wearables</span></div></a>
@@ -384,6 +439,7 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
     <a class="blk b5" href="#about"><div class="id">LEAD · 0x05</div><div><b>People</b><br><span>Mentoring, teams, volunteering</span></div></a>
     <a class="blk b6" href="#notes"><div class="id">WRITE · 0x06</div><div><b>Notes</b><br><span>What I'm learning</span></div></a>
     <a class="blk b7" href="#contact"><div class="id">I/O · 0x07</div><div><b>Contact</b></div></a>
+  </div>
   </div>
 </section>
 
@@ -414,9 +470,9 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
 
   <div class="proj flip rv">
     <div class="txt">
-      <div class="tag">Published paper</div>
-      <h3>Real-time object detection</h3>
-      <p>Detecting objects fast enough to matter, frame after frame. Speed and accuracy pull against each other, and the confidence threshold is where you choose.</p>
+      <div class="tag">Published paper · JETIR</div>
+      <h3>Object detection with voice feedback</h3>
+      <p>A system that detects and recognises objects in real time and says them out loud, so a blind user knows what is in front of them. Speed matters as much as accuracy, and the confidence threshold is where you choose.</p>
       <p>Slide the threshold: low lets noise through, high starts missing real objects.</p>
       <div class="chips"><span>detection</span><span>real-time</span><span>edge inference</span></div>
       <button class="rm" data-rm="detect">Read more &rarr;</button>
@@ -538,21 +594,21 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
   </div>
   <div class="path" id="path">
     <div class="trace"><i id="traceFill"></i></div>
-    <div class="stop"><div class="when">Now</div><h4>MS Electrical Engineering · San José State</h4><p>Digital design, SoCs and FPGAs, with a focus on running AI efficiently on small devices.</p></div>
+    <div class="stop"><div class="when">Aug 2026 → now</div><h4>MS Electrical Engineering · San José State</h4><p>Digital design, SoCs and FPGAs, with a focus on running AI efficiently on small devices.</p></div>
     <div class="stop"><div class="when">Sep 2026</div><h4>Runner-up · Embedded World NA Edge AI Hackathon</h4><p>Led a four-person team to second place in the Sustainability track.</p></div>
     <div class="stop"><div class="when">Mar 2023 → May 2026</div><h4>AI &amp; ML Developer · CaprusIT</h4><p>Production AI for Menthra (LLM + RAG wellness), Aauti (vision and avatar video) and EmpowerMX (aviation maintenance ML). Mentored interns and freshers.</p></div>
-    <div class="stop"><div class="when">Nov 2023</div><h4>Advanced Certification in Deep Learning · IISc Bangalore</h4><p>Thesis on monocular depth estimation.</p></div>
+    <div class="stop"><div class="when">Oct 2022 → Nov 2023</div><h4>Advanced Certification in Deep Learning · IISc Bangalore</h4><p>Thesis on monocular depth estimation.</p></div>
     <div class="stop"><div class="when">Mar 2022 → Feb 2023</div><h4>Software Developer · Votivesoft</h4><p>Web applications for e-Governance systems on the LAMP stack.</p></div>
-    <div class="stop"><div class="when">Gold medal</div><h4>MTech Data Science · Jain University</h4><p>AICTE-funded. Thesis on hyperspectral image reconstruction.</p></div>
     <div class="stop"><div class="when">Dec 2020 → Jun 2021</div><h4>ADAS Engineering Intern · Continental</h4><p>Python development and testing of camera calibration algorithms in the ADAS business unit.</p></div>
-    <div class="stop"><div class="when">Where it started</div><h4>BTech EEE · GVPCE(A)</h4><p>NSS Coordinator for 100+ volunteers, IEEE student body executive, Rotaract, cultural club treasurer.</p></div>
+    <div class="stop"><div class="when">Aug 2019 → Jun 2021</div><h4>MTech Data Science · Jain University</h4><p>Gold medalist, AICTE-funded. Thesis on hyperspectral image reconstruction.</p></div>
+    <div class="stop"><div class="when">Aug 2015 → Apr 2019</div><h4>BTech EEE · GVPCE(A)</h4><p>NSS Coordinator for 100+ volunteers, IEEE student body executive, Rotaract, cultural club treasurer.</p></div>
   </div>
 </section>
 
 <section class="notes" id="notes">
   <div class="sec-head rv">
     <div><div class="eyebrow">Field notes</div><h2>Things I'm <em>learning out loud.</em></h2></div>
-    <p>Short posts on hardware, models and the space between them.</p>
+    <p>Notes from my projects and what I'm learning.</p>
   </div>
   <div class="posts" id="posts"></div>
 </section>
@@ -679,13 +735,13 @@ function whenVisible(el, fn){
   pcb.receiveShadow = true; board.add(pcb);
 
   /* chip */
-  const cc = document.createElement('canvas'); cc.width = cc.height = 512; const c2 = cc.getContext('2d');
+  const cc = document.createElement('canvas'); cc.width = cc.height = 1024; const c2 = cc.getContext('2d'); c2.scale(2,2);
   c2.fillStyle = '#16191a'; c2.fillRect(0,0,512,512);
   c2.fillStyle = '#d4a84b'; c2.font = 'italic 300 118px Fraunces, Georgia, serif'; c2.textAlign = 'center'; c2.fillText('SK', 256, 250);
   c2.font = '500 30px JetBrains Mono, monospace'; c2.fillStyle = '#c9bfa9'; c2.fillText('DIGITAL · FPGA · AI', 256, 320);
   c2.font = '400 22px JetBrains Mono, monospace'; c2.fillStyle = '#7d766a'; c2.fillText('REV A', 256, 360);
-  c2.beginPath(); c2.arc(60,60,14,0,7); c2.fillStyle = '#2b2f30'; c2.fill();
-  const chipTex = new THREE.CanvasTexture(cc); chipTex.encoding = THREE.sRGBEncoding;
+  c2.beginPath(); c2.arc(44,44,11,0,7); c2.fillStyle = '#2b2f30'; c2.fill();
+  const chipTex = new THREE.CanvasTexture(cc); chipTex.encoding = THREE.sRGBEncoding; chipTex.anisotropy = 4;
   const cS = 410/TW*BW; // chip size in world
   const chipDark = new THREE.MeshStandardMaterial({color:0x16191a, roughness:.45, metalness:.3});
   const chip = new THREE.Mesh(new THREE.BoxGeometry(cS,0.32,cS), [chipDark,chipDark,new THREE.MeshStandardMaterial({map:chipTex, roughness:.4, metalness:.25}),chipDark,chipDark,chipDark]);
@@ -703,6 +759,31 @@ function whenVisible(el, fn){
     });
   }
   board.add(pins);
+
+  /* package lid, cavity and die. Only shown in stage mode, where the lid opens onto the floorplan. */
+  const DIE_W = 2.6, DIE_H = DIE_W/1.6, WIN_M = 0.1, LID_T = 0.008, WIN_W = DIE_W+2*WIN_M, WIN_H = DIE_H+2*WIN_M, LID_W = WIN_W+0.08, LID_H = WIN_H+0.08, TOP_Y = 0.41, LID_Y = TOP_Y+0.0065;
+  const CAV = '#0b0f0d', SUB = '#111613', lidU = LID_W/cS, lidV = LID_H/cS;
+  const lids = [-1,1].map(sd=>{
+    const tx = chipTex.clone(); tx.repeat.set(lidU/2, lidV); tx.offset.set(sd<0 ? .5-lidU/2 : .5, .5-lidV/2); tx.needsUpdate = true;
+    const m = new THREE.Mesh(new THREE.BoxGeometry(LID_W/2,LID_T,LID_H), [chipDark,chipDark,new THREE.MeshStandardMaterial({map:tx, roughness:.4, metalness:.25}),chipDark,chipDark,chipDark]);
+    m.userData.sd = sd; m.visible = false; board.add(m); return m;
+  });
+  const cavTex = (()=>{
+    const U = 400, c = document.createElement('canvas'); c.width = Math.round(WIN_W*U); c.height = Math.round(WIN_H*U);
+    const x = c.getContext('2d'), W = c.width, Hh = c.height, m = WIN_M*U;
+    x.fillStyle = CAV; x.fillRect(0,0,W,Hh);
+    [[0,0,0,m],[0,Hh,0,Hh-m],[0,0,m,0],[W,0,W-m,0]].forEach(([x0,y0,x1,y1])=>{ const gr = x.createLinearGradient(x0,y0,x1,y1); gr.addColorStop(0,'rgba(0,0,0,.7)'); gr.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle = gr; x.fillRect(0,0,W,Hh); });
+    x.lineCap = 'round';
+    const wire = (ax,ay,bx,by)=>{ x.strokeStyle = 'rgba(226,187,99,.6)'; x.lineWidth = 2.6; x.beginPath(); x.moveTo(ax,ay); x.lineTo(bx,by); x.stroke(); x.fillStyle = '#d4a84b'; x.fillRect(bx-5,by-5,10,10); };
+    for(let i=0;i<14;i++){ const t = (i+.5)/14, a = m+14+t*(W-2*m-28), b = 20+t*(W-40); wire(a,m+1,b,8); wire(a,Hh-m-1,b,Hh-8); }
+    for(let i=0;i<9;i++){ const t = (i+.5)/9, a = m+14+t*(Hh-2*m-28), b = 20+t*(Hh-40); wire(m+1,a,8,b); wire(W-m-1,a,W-8,b); }
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t;
+  })();
+  const flat = (w,h,tex,y,tr)=>{ const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({map:tex, transparent:!!tr, depthWrite:!tr, fog:false})); m.rotation.x = -Math.PI/2; m.position.y = y; m.visible = false; board.add(m); return m; };
+  const dcA = document.createElement('canvas'), dcB = document.createElement('canvas'); dcA.width = dcB.width = 16; dcA.height = dcB.height = 10;
+  const dieTex = c=>{ const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; return t; };
+  const cavity = flat(WIN_W, WIN_H, cavTex, TOP_Y+0.002), dieA = flat(DIE_W, DIE_H, dieTex(dcA), TOP_Y+0.004), dieB = flat(DIE_W, DIE_H, dieTex(dcB), TOP_Y+0.006, true);
+  dieB.renderOrder = 2;
 
   /* components */
   const capMat = new THREE.MeshStandardMaterial({color:0x2b2f33, metalness:.6, roughness:.35});
@@ -739,27 +820,106 @@ function whenVisible(el, fn){
   function along(pa, t, out){ let d = t*pa.L; for(let i=0;i<pa.segs.length;i++){ if(d <= pa.segs[i]){ return out.lerpVectors(pa.pts[i], pa.pts[i+1], d/pa.segs[i]); } d -= pa.segs[i]; } return out.copy(pa.pts[pa.pts.length-1]); }
 
   const ndc = new THREE.Vector2(); addEventListener('pointermove', e=>{ ndc.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1); }, {passive:true});
-  const hero = $('#top'), heroText = $('#heroText'), fade = $('#fade');
-  let vw = 0, vh = 0;
-  function resize(){ if(!innerWidth || !innerHeight) return; vw = innerWidth; vh = innerHeight; renderer.setSize(vw, vh, false); camera.aspect = vw/vh; camera.updateProjectionMatrix(); }
-  addEventListener('resize', resize); resize();
+  const hero = $('#top'), stick = hero.querySelector('.stick'), heroText = $('#heroText'), fade = $('#fade'), cue = hero.querySelector('.cue');
+  const pin = $('#diePin'), floorEl = $('#floor'), blks = [...floorEl.querySelectorAll('.blk')];
+  const stageMQ = matchMedia('(min-width:761px) and (min-height:640px)'), phone = matchMedia('(max-width:600px)');
   const A = {p:new THREE.Vector3(-1.5,10.5,12.8), t:new THREE.Vector3(-4.2,0,0.4)}, B = {p:new THREE.Vector3(0,3.2,0.25), t:new THREE.Vector3(0,0,0)};
-  const cp = A.p.clone(), ct = A.t.clone(), wp = new THREE.Vector3(), wt = new THREE.Vector3();
+  const AP = {p:new THREE.Vector3(0,13.6,15.4), t:new THREE.Vector3(0,0,4.6)};   // phones: chip centred, above the headline
+  const H = {p:new THREE.Vector3(0,3.9,0), t:new THREE.Vector3()};               // stage: straight down, die on the floorplan
+  const cp = A.p.clone(), ct = A.t.clone(), wp = new THREE.Vector3(), wt = new THREE.Vector3(), v0 = new THREE.Vector3();
+  let vw = 0, vh = 0, stage = false, broken = false, sp = -1, spx = 0, spy = 0, dieKey = '';
+
+  /* silicon texture inside each block of the die */
+  const pattern = (x,i,X,Y,w,h,k,rn)=>{
+    const t = [0,1,2,3,1,4,5][i%7]; x.beginPath();
+    if(t===0){ const p = 9*k; for(let u=X+p;u<X+w-p/2;u+=p) for(let v=Y+p;v<Y+h-p/2;v+=p) x.rect(u-p*.3,v-p*.3,p*.6,p*.6); }
+    else if(t===1){ const p = 7*k; for(let v=Y+p;v<Y+h;v+=p){ x.moveTo(X,v); x.lineTo(X+w,v); let u = X+rn()*p*2; while(u<X+w){ x.moveTo(u,v); x.lineTo(u,v-p); u += p*(.6+rn()*2.4); } } }
+    else if(t===2){ for(let n=0;n<7;n++){ const mw = w*(.12+rn()*.22), mh = h*(.1+rn()*.2); x.rect(X+rn()*(w-mw), Y+rn()*(h-mh), mw, mh); } for(let v=Y+6*k;v<Y+h;v+=14*k){ x.moveTo(X,v); x.lineTo(X+w,v); } }
+    else if(t===3){ for(let n=0;n<16;n++){ let u = X, v = Y+rn()*h; x.moveTo(u,v); while(u<X+w){ u += w*(.08+rn()*.2); x.lineTo(u,v); v += (rn()<.5?-1:1)*8*k; x.lineTo(u,v); } } }
+    else if(t===4){ const p = 5*k; for(let u=X+p;u<X+w;u+=p){ x.moveTo(u,Y); x.lineTo(u,Y+h); } for(let v=Y+p*3;v<Y+h;v+=p*3){ x.moveTo(X,v); x.lineTo(X+w,v); } }
+    else { const p = 16*k; for(let u=X+p*.7;u<X+w-p*.5;u+=p) x.rect(u-p*.3,Y+h-p*.75,p*.6,p*.5); }
+    x.stroke();
+  };
+  const rr = (x,X,Y,w,h,r)=>{ x.beginPath(); x.moveTo(X+r,Y); x.arcTo(X+w,Y,X+w,Y+h,r); x.arcTo(X+w,Y+h,X,Y+h,r); x.arcTo(X,Y+h,X,Y,r); x.arcTo(X,Y,X+w,Y,r); x.closePath(); };
+  /* the die is drawn from the floorplan's own layout, so the two line up block for block */
+  function drawDie(fr){
+    const k = Math.min(2, 2048/fr.width), W = Math.round(fr.width*k), Hh = Math.round(fr.height*k), bl = floorEl.clientLeft, bt = floorEl.clientTop;
+    dcA.width = dcB.width = W; dcA.height = dcB.height = Hh; const a = dcA.getContext('2d'), b = dcB.getContext('2d');
+    a.fillStyle = CAV; a.fillRect(0,0,W,Hh); rr(a,0,0,W,Hh,10*k); a.fillStyle = SUB; a.fill();
+    blks.forEach((el,i)=>{
+      const X = (el.offsetLeft+bl)*k, Y = (el.offsetTop+bt)*k, w = el.offsetWidth*k, h = el.offsetHeight*k;
+      [a,b].forEach((x,layer)=>{ let sd = 11+i*97; const rn = ()=>{ sd = (sd*16807)%2147483647; return sd/2147483647; };
+        x.save(); rr(x,X,Y,w,h,6*k); x.clip(); if(layer){ x.fillStyle = 'rgba(20,62,50,.35)'; x.fillRect(X,Y,w,h); }
+        x.strokeStyle = layer ? 'rgba(226,187,99,.24)' : 'rgba(226,187,99,.05)'; x.lineWidth = k; pattern(x,i,X,Y,w,h,k,rn); x.restore(); });
+      rr(b,X+k/2,Y+k/2,w-k,h-k,6*k); b.strokeStyle = 'rgba(226,187,99,.9)'; b.lineWidth = k; b.stroke();
+    });
+    b.shadowColor = 'rgba(240,207,122,.8)'; b.shadowBlur = 9*k; rr(b,k,k,W-2*k,Hh-2*k,9*k); b.strokeStyle = '#d4a84b'; b.lineWidth = 2*k; b.stroke(); b.shadowBlur = 0;
+    dieA.material.map.needsUpdate = dieB.material.map.needsUpdate = true;
+  }
+  /* where the camera has to be so the die lands exactly on the floorplan's rectangle */
+  function layoutStage(){
+    const pr = pin.getBoundingClientRect(), fr = floorEl.getBoundingClientRect(); if(!fr.width || !vh) return;
+    const sc = fr.width/DIE_W, d = vh/(2*Math.tan(camera.fov*Math.PI/360)*sc);
+    H.p.set((vw/2-(fr.left-pr.left+fr.width/2))/sc, TOP_Y+0.005+d, (vh/2-(fr.top-pr.top+fr.height/2))/sc); H.t.set(H.p.x, 0, H.p.z);
+    const key = fr.width+'x'+fr.height; if(key !== dieKey){ dieKey = key; drawDie(fr); }
+  }
+  function setStage(on){
+    if(on === stage) return; stage = on; document.documentElement.classList.toggle('stage', on); sp = -1;
+    lids.forEach(m=>{ m.visible = on; m.castShadow = false; m.rotation.z = 0; m.position.set(m.userData.sd*LID_W/4, LID_Y, 0); });
+    cavity.visible = dieA.visible = dieB.visible = false; camera.up.set(0,1,0); fade.style.opacity = 0;
+    if(!on){ pin.style.opacity = ''; pin.classList.remove('on'); cue.style.opacity = ''; glows.forEach(g=>g.scale.set(0.6,0.6,0.6)); }
+  }
+  function resize(){
+    const w = stick.clientWidth, h = stick.clientHeight; if(!w || !h) return;
+    vw = w; vh = h; renderer.setSize(vw, vh, false); camera.aspect = vw/vh; camera.updateProjectionMatrix();
+    setStage(!reduce && !broken && stageMQ.matches); if(stage) layoutStage();
+  }
+  addEventListener('resize', resize); resize();
+  if(window.ResizeObserver){ const ro = new ResizeObserver(()=>{ if(stage) layoutStage(); }); ro.observe(floorEl); ro.observe(pin.firstElementChild); }
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{ if(stage) layoutStage(); });
+  /* keyboard: tabbing to a block before the chip has opened scrolls it open */
+  floorEl.addEventListener('focusin', ()=>{ if(stage && scrollY < 1.7*vh) scrollTo(0, Math.round(1.8*vh)); });
+
+  const ease = t=>t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2, sm = t=>{ t = Math.min(1, Math.max(0, t)); return t*t*(3-2*t); };
+  /* stage timeline, in screens scrolled: 0 to 1.45 fly in (lid opens from 0.95), 1.45 to 1.7 the real floorplan takes over, then it holds until 2 */
+  function stageFrame(k){
+    const S = Math.max(0, scrollY/vh);
+    sp = sp < 0 ? S : sp+(S-sp)*k; if(Math.abs(S-sp) < 2e-4) sp = S;
+    const q = Math.min(1, sp/1.45), e = ease(q), o = sm((sp-0.95)/0.5), f = sm((sp-1.45)/0.25);
+    v0.copy(A.p).sub(A.t).multiplyScalar(camera.aspect < 0.9 ? 1.6 : 1).add(A.t);
+    camera.position.lerpVectors(v0, H.p, e); wt.lerpVectors(A.t, H.t, e); camera.up.set(0,1-e,-e).normalize(); camera.lookAt(wt);
+    const tilt = Math.max(0, 1-sp/0.9); spx += (ndc.x-spx)*0.06; spy += (ndc.y-spy)*0.06;
+    board.rotation.x = -spy*0.08*tilt; board.rotation.z = -spx*0.08*tilt;
+    lids.forEach(m=>{ const sd = m.userData.sd; m.position.set(sd*(LID_W/4+1.5*o), LID_Y+2.7*o*o, 0); m.rotation.z = -sd*0.7*o; m.castShadow = o > 0.01; m.visible = o < 1; });
+    cavity.visible = dieA.visible = o > 0; dieB.visible = o > 0 && f < 1; dieB.material.opacity = 1-f;
+    const txt = Math.max(0, 1-2*sp), fo = Math.min(f, sm((S-1)/0.1));
+    heroText.style.opacity = cue.style.opacity = txt; hero.style.setProperty('--hg', txt); heroText.style.transform = `translateY(${-sp*61.5}px)`;
+    pin.style.opacity = fo; pin.classList.toggle('on', fo > 0.6); pin.style.setProperty('--dim', (0.4+0.6*sm((S-1.75)/0.25)).toFixed(3));
+    const gs = 0.6*(1-0.6*e); glows.forEach(g=>g.scale.set(gs,gs,gs));
+    return q;
+  }
+
   let prev = performance.now();
   function frame(now){
     const dt = Math.min(.05,(now-prev)/1000); prev = now;
-    if(innerWidth !== vw || innerHeight !== vh) resize();
-    const h = hero.offsetHeight - innerHeight, p = h > 0 ? Math.min(1, Math.max(0, scrollY/h)) : 0;
+    if(stick.clientWidth !== vw || stick.clientHeight !== vh) resize();
     if(vw && vh && scrollY < hero.offsetHeight + 50){
-      const e = p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2;
-      const far = camera.aspect < 0.9 ? 1.6 : 1;
-      wp.lerpVectors(A.p, B.p, e); wt.lerpVectors(A.t, B.t, e);
-      wp.sub(wt).multiplyScalar(far*(1-e)+e).add(wt);
       const k = reduce ? 1 : 1-Math.pow(0.002, dt);
-      cp.lerp(wp,k); ct.lerp(wt,k); camera.position.copy(cp); camera.lookAt(ct);
-      const tilt = (1-p);
-      board.rotation.x += ((-ndc.y*0.08*tilt) - board.rotation.x)*0.06;
-      board.rotation.z += ((-ndc.x*0.08*tilt) - board.rotation.z)*0.06;
+      let p = 0;
+      if(stage){ try{ p = stageFrame(k); }catch(err){ broken = true; setStage(false); } }
+      if(!stage){
+        const h = hero.offsetHeight - innerHeight; p = h > 0 ? Math.min(1, Math.max(0, scrollY/h)) : 0;
+        const e = p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2;
+        const ph = phone.matches, S0 = ph ? AP : A, far = !ph && camera.aspect < 0.9 ? 1.6 : 1;
+        wp.lerpVectors(S0.p, B.p, e); wt.lerpVectors(S0.t, B.t, e);
+        wp.sub(wt).multiplyScalar(far*(1-e)+e).add(wt);
+        cp.lerp(wp,k); ct.lerp(wt,k); camera.position.copy(cp); camera.lookAt(ct);
+        const tilt = (1-p);
+        board.rotation.x += ((-ndc.y*0.08*tilt) - board.rotation.x)*0.06;
+        board.rotation.z += ((-ndc.x*0.08*tilt) - board.rotation.z)*0.06;
+        heroText.style.opacity = Math.max(0, 1-p*2.6); hero.style.setProperty('--hg', Math.max(0, 1-p*2.6)); heroText.style.transform = `translateY(${-p*80}px)`;
+        fade.style.opacity = Math.max(0, (p-0.78)/0.22);
+      }
       for(let i=0;i<NP;i++){
         const o = P[i]; o.t += o.sp*dt*(1+p*2)*(reduce?0:1); if(o.t>1){ o.t = 0; o.path = Math.floor(rnd()*paths.length); }
         const tt = o.dir>0 ? o.t : 1-o.t;
@@ -767,8 +927,6 @@ function whenVisible(el, fn){
       }
       pulses.instanceMatrix.needsUpdate = true;
       led.material.color.setHSL(0.36, .55, .45+.2*Math.sin(now/400)); ledL.intensity = .5+.4*Math.sin(now/400);
-      heroText.style.opacity = Math.max(0, 1-p*2.6); hero.style.setProperty('--hg', Math.max(0, 1-p*2.6)); heroText.style.transform = `translateY(${-p*80}px)`;
-      fade.style.opacity = Math.max(0, (p-0.78)/0.22);
       renderer.render(scene, camera);
     }
     requestAnimationFrame(frame);
@@ -1151,6 +1309,79 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
 })();
 end koluvu steps */
 
+/* one signal: a trace in the left gutter from the boot terminal to the contact pins */
+(function(){
+  const mq = matchMedia('(min-width:1000px)'), NS = 'http://www.w3.org/2000/svg';
+  const mk = (t,a,par)=>{ const e = document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); if(par) par.appendChild(e); return e; };
+  const svg = mk('svg',{class:'sig','aria-hidden':'true'}); document.body.appendChild(svg);
+  const defs = mk('defs',{},svg), gT = mk('linearGradient',{id:'sigT',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:0,y2:1},defs), gL = mk('linearGradient',{id:'sigL',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:0,y2:1},defs);
+  const trk = mk('path',{class:'trk',stroke:'url(#sigT)'},svg), halo = mk('path',{class:'halo',stroke:'url(#sigL)'},svg), core = mk('path',{class:'core',stroke:'url(#sigL)'},svg);
+  const tapG = mk('g',{},svg), glow = mk('circle',{r:9,class:'glow'},svg), head = mk('circle',{r:3.5,class:'head'},svg);
+  const pinsEl = $('.pins'), pinEls = [...document.querySelectorAll('.pin')];
+  let G = null, raf = 0;
+  const pos = el=>{ let x = 0, y = 0, e = el; while(e){ x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return {x, y, w:el.offsetWidth, h:el.offsetHeight}; };
+  function build(){
+    const on = mq.matches; document.documentElement.classList.toggle('sigon', on); if(!on){ G = null; return; }
+    const W = document.documentElement.clientWidth, Hd = document.documentElement.scrollHeight;
+    svg.setAttribute('width', W); svg.setAttribute('height', Hd); svg.setAttribute('viewBox', `0 0 ${W} ${Hd}`);
+    const work = pos($('#work .sec-head')), gx = Math.max(16, work.x-40);
+    const term = pos($('#term')), path = pos($('#path')), bar = pos($('.chipbar'));
+    const jx = path.x+19.5, jt = path.y+6, jb = path.y+path.h-6, y0 = term.y-30, yEnd = bar.y+bar.h/2;
+    const d = `M${gx},${y0} V${jt-30} H${jx-15} L${jx},${jt-15} V${jb+15} L${jx-15},${jb+30} H${gx} V${yEnd} H${bar.x}`;
+    [trk,halo,core].forEach(e=>e.setAttribute('d', d));
+    /* colour per section: gold on dark sections, rust on light ones; hidden where the journey's own trace carries the signal */
+    const secs = [['.boot','d'],['#work','l'],['#journey','d'],['#notes','l'],['#about','l'],['#contact','d']].map(([q,t])=>{ const r = pos($(q)); return [r.y, r.y+r.h, t]; });
+    const colT = {d:'rgba(212,168,75,.28)', l:'rgba(181,83,42,.24)'}, colL = {d:'#f0cf7a', l:'#b5532a'};
+    const stops = [];
+    secs.forEach(([a,b,t])=>{ stops.push([a,t],[b,t]); });
+    [gT,gL].forEach((g,gi)=>{ g.setAttribute('y2', Hd); g.innerHTML = '';
+      const add = (y,c)=>mk('stop',{offset:Math.max(0,Math.min(1,y/Hd)),'stop-color':c},g);
+      stops.forEach(([y,t])=>{
+        if(y > jt-14 && y < jb+14) return;
+        add(y, gi ? colL[t] : colT[t]);
+      });
+      // journey span: transparent
+      const jc = gi ? colL.d : colT.d; add(jt-14, jc); add(jt-14, 'rgba(0,0,0,0)'); add(jb+14, 'rgba(0,0,0,0)'); add(jb+14, jc);
+      [...g.children].sort((a,b)=>a.getAttribute('offset')-b.getAttribute('offset')).forEach(c=>g.appendChild(c));
+    });
+    const L = core.getTotalLength(), samp = [];
+    for(let l=0;l<=L;l+=6){ const pt = core.getPointAtLength(l); samp.push([pt.y,l]); } samp.push([core.getPointAtLength(L).y, L]);
+    [halo,core].forEach(e=>{ e.style.strokeDasharray = L; });
+    /* taps: a short branch to each heading the signal passes */
+    tapG.innerHTML = '';
+    const theme = y=>{ for(const [a,b,t] of secs) if(y>=a && y<b) return t; return 'd'; };
+    const targets = ['.boot .term', '#work .sec-head .eyebrow', '#sense', '#think', '#build', '#journey .sec-head .eyebrow', '#notes .sec-head .eyebrow', '#about .eyebrow'];
+    const taps = targets.map(q=>{ const el = $(q); if(!el) return null; const r = pos(el), y = q==='.boot .term' ? r.y+34 : r.y+r.h/2, x1 = r.x-8, len = Math.max(0, x1-gx);
+      const g = mk('g',{class:'tap '+theme(y)},tapG), st = mk('path',{class:'stub',d:`M${gx},${y} H${x1}`},g); st.style.strokeDasharray = len; st.style.strokeDashoffset = len;
+      mk('circle',{class:'via',cx:gx,cy:y,r:3.5},g); return {y, g, st, len}; }).filter(Boolean);
+    G = {gx, y0, yEnd, L, samp, taps, theme, jt, jb};
+    update();
+  }
+  function lenAt(y){ const s = G.samp; if(y <= s[0][0]) return 0; let lo = 0, hi = s.length-1; while(hi-lo>1){ const m = (lo+hi)>>1; if(s[m][0] < y) lo = m; else hi = m; }
+    // for horizontal runs (same y) take the far end once the head is past them
+    return y >= s[hi][0] ? s[hi][1] : s[lo][1]; }
+  function update(){
+    raf = 0; if(!G) return;
+    const vh = innerHeight, sMax = document.documentElement.scrollHeight - vh, fEnd = (G.yEnd - sMax)/vh;
+    const t = Math.min(1, Math.max(0, (scrollY-(sMax-vh))/vh)), f = 0.6 + (fEnd-0.6)*t*t*(3-2*t);
+    const hy = scrollY + f*vh;
+    let l = hy <= G.y0 ? 0 : lenAt(hy); if(hy >= G.yEnd - 1) l = G.L;
+    halo.style.strokeDashoffset = core.style.strokeDashoffset = G.L - l;
+    const pt = core.getPointAtLength(l), th = G.theme(pt.y), vis = l > 0 && l < G.L && !(pt.y > G.jt-14 && pt.y < G.jb+14);
+    head.setAttribute('cx', pt.x); head.setAttribute('cy', pt.y); glow.setAttribute('cx', pt.x); glow.setAttribute('cy', pt.y);
+    head.setAttribute('class','head '+th); glow.setAttribute('class','glow '+th); head.style.opacity = glow.style.opacity = vis ? 1 : 0;
+    G.taps.forEach(tp=>{ const on = l > 0 && pt.y >= tp.y - 0.5; tp.g.classList.toggle('on', on); tp.st.style.strokeDashoffset = on ? 0 : tp.len; });
+    const arrived = l >= G.L - 0.5; pinsEl.classList.toggle('live', arrived);
+    pinEls.forEach((el,i)=>{ el.style.transitionDelay = arrived ? (i*0.12)+'s' : '0s'; el.querySelector('.leg').style.transitionDelay = arrived ? (i*0.12)+'s' : '0s'; el.classList.toggle('sig-on', arrived); });
+  }
+  const req = ()=>{ if(!raf) raf = requestAnimationFrame(update); };
+  let bt = 0; const rebuild = ()=>{ clearTimeout(bt); bt = setTimeout(build, 120); };
+  addEventListener('scroll', req, {passive:true}); addEventListener('resize', rebuild); mq.addEventListener ? mq.addEventListener('change', build) : mq.addListener(build);
+  if(window.ResizeObserver) new ResizeObserver(rebuild).observe(document.body);
+  addEventListener('load', build); if(document.fonts && document.fonts.ready) document.fonts.ready.then(build);
+  build();
+})();
+
 /* journey trace */
 (function(){
   const path = $('#path'), fill = $('#traceFill'), stops = [...path.querySelectorAll('.stop')];
@@ -1164,13 +1395,17 @@ end koluvu steps */
   const posts = [
     {date:'Nov 2026', tag:'Hackathons', title:'Runner-up without a servo', excerpt:'Two days, an Arduino Uno Q, a conveyor belt and a problem we only learned that morning.', body:[
       'At the Embedded World North America Edge AI Hackathon, the challenges were handed out on the morning of day one. Ours: sort waste into compost, recycling or trash with machine vision, and flash the answer on an OLED.',
-      'We had a conveyor belt with a DC motor and no servo, so nothing could physically push an item into a bin. That constraint shaped everything. We focused on getting the classification right and making the decision obvious on the display.',
+      'The conveyor was tiny, too small for real trash, and it had a DC motor but no servo, so nothing could push an item into a bin.',
+      'That left two options. Train on a small set of the exact pieces on the table (a bit of food, a wrapper, plastic, cardboard) and overfit to them, or build a model that would still work on real waste. We chose the second. We focused on getting the classification right and making the decision obvious on the display.',
+      'It cost us first place. The winning team trained on about 200 images of the small demo items, which scored better on the table. Ours was built for real waste.',
       'My main lesson from leading the team was to decide early. With two days, the hardest part was not the model, it was saying no to good ideas we did not have time for.',
-      'We finished second in the Sustainability track. The next version gets an actuator.']},
-    {date:'Nov 2026', tag:'Career', title:'From LLMs to logic gates', excerpt:'Why I left three years of building language model systems to learn hardware.', body:[
-      'For three years I built retrieval-augmented LLM systems. I learned how to make models useful. I did not learn what they cost to run, or where they actually run.',
-      'The more I worked with models, the more I wanted to understand the layer under them: the memory, the data movement, the silicon. Most of the cost of AI lives there.',
-      'So I came to San José State for an MSEE. Now I write SystemVerilog, read timing reports, and think about where every byte lives. It is slower, and I love it.']},
+      'We finished second in the Sustainability track. Now I am building the next version as a side project, with real waste and an actuator that actually sorts.']},
+    {date:'Nov 2026', tag:'Career', title:'The long way back to hardware', excerpt:'I started in electrical engineering, spent years in data science and AI, and came back.', body:[
+      'As a kid I wanted to be an astronaut. Then I got glasses, someone told me astronauts cannot wear them, so I decided to be a space scientist instead. I became neither. These days the space I care about is on a chip, where every square millimetre and every byte counts.',
+      'I chose electrical engineering. Near the end of my BTech I took a machine learning course and got hooked, but my favourite part of those four years was the embedded systems lab. I scored the highest in it and ended up helping my classmates through it.',
+      'In 2019, data science looked like the future, so I did my MTech in it. That led to three years of production AI at CaprusIT across Menthra, Aauti and EmpowerMX: LLM chat with RAG, computer vision and avatar video, and classic ML with sentence embeddings, clustering, random forests, classification and recommendation. I learned how to make models useful. I also missed building something I could hold.',
+      'I learned what AI costs, too. I tracked our GPU, API and licence spending, and moved our model testing to Lambda Labs, where the same 8-GPU machine cost about a third of what it did on AWS or Azure. My manager and I read NVIDIA\'s documentation so many times that we joked we could write the book. Every bill raised the same question: what if this ran on a chip instead of in a data center?',
+      'About two years into the job I started relearning embedded systems on my own. Moving straight into hardware with no hardware experience was not realistic, so I came to San José State for an MSEE, where my software years count instead of starting over. Now I write SystemVerilog, read timing reports, and think about where every byte lives. It is slower, and I love it. And one day, I would love for a chip I designed to go to space.']},
     {date:'Coming soon', tag:'FPGA', title:'What a barrel shifter taught me about parameters', excerpt:'Notes from my first parameterized RTL module.', soon:true}
   ];
   const wrap = $('#posts'), modal = $('#modal');
@@ -1186,24 +1421,60 @@ end koluvu steps */
   const P = {
     depth:{meta:'IISc Bangalore · Sep to Nov 2023',title:'Monocular depth estimation',lead:'Recovering depth from a single camera image, the kind of perception that lets a cheap sensor understand distance. A group project of four at IISc, supervised by Prof. Venkatesh Babu.',stats:[['85.81%','test accuracy, Keras metric'],['4','encoders compared'],['25,000','training images'],['327','test images']],secs:[['What we built',['Compared four U-Net encoders on NYU Depth V2: DenseNet-121, DenseNet-169, DenseNet-201 and ResNeXt-50','Final model: a DenseNet-201 U-Net with a custom SSIM + edge + cosine loss, trained for 10 epochs on 25,000 images','Also applied to NASA HiRISE Mars imagery']],['The result',['Test accuracy 85.81%: the Keras accuracy metric on our 327-image NYU Depth V2 test split']],['What happened next',['At SJSU I took depth estimation onto an FPGA in a separate project, FastDepth on a Zynq-7000. It is under Hardware on this page.']]],stack:['U-Net','DenseNet-201','NYU Depth V2','Keras','Computer vision']},
     fpga:{meta:'SJSU · EE 295 · 2026',title:'Fixed-point depth on a Zynq FPGA',lead:'How much precision does an on-device depth network need, and what should run on the ARM cores versus the FPGA fabric? I answered both for FastDepth on a Zybo Z7-10.',stats:[['4.02 ms','FPGA layer, incl. DMA'],['11.7×','faster than ARM NEON'],['0','mismatches, bit-exact'],['63 / 80','DSP slices at 100 MHz']],secs:[['On the FPGA',['FastDepth (MobileNet encoder, NYU Depth v2) on a Digilent Zybo Z7-10 (Zynq-7000)','First convolution layer as a streaming, line-buffered INT8 kernel in Vitis HLS, with AXI DMA in a Vivado block design','4.02 ms on the board including DMA: 11.7× faster than ARM NEON INT8 and 38.8× faster than scalar FP32','Bit-exact: 0 of 401,408 outputs differ from the ARM INT8 golden model; 29.1 dB SQNR against FP32','Timing met at 100 MHz using 63 of 80 DSPs. INT16 at the same parallelism would need 108 DSPs, which is why INT8 went to the board']],['The precision study',['FP32, INT16, INT8 and mixed precision compared on NYU Depth v2 (654 test images)','INT16 matched FP32 exactly; INT8 cost some accuracy (RMSE 0.604 to 0.723 m)','Judged by a stopping-distance brake model too: mixed precision beat INT8 on RMSE yet missed more brake decisions (39 vs 29), so precision should be chosen against the task, not just the benchmark']],['Next',['Extend from layer 1 to the full encoder, partitioned between ARM and FPGA by measured latency and task impact','Choose per-layer precision by brake-decision sensitivity instead of RMSE']]],stack:['FastDepth','PyTorch','Vitis HLS','Vivado','AXI DMA','Zynq-7000','INT8 / INT16'],link:['Code, reports and board results on GitHub','https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint']},
-    detect:{meta:'Published paper',title:'Real-time object detection',lead:'Research on detecting objects fast enough to act on, where latency matters as much as accuracy.',secs:[['Why it matters',['On a car, a robot or a camera, a detection that arrives late is a detection that missed','The confidence threshold is where you trade false alarms against missed objects, which is what the demo lets you feel']]],stack:['Object detection','Computer vision','Real-time systems']},
+    detect:{meta:'Published paper · JETIR',title:'Real-Time Object Detection and Recognition with Voice Feedback for the Blind',lead:'Published in JETIR (Journal of Emerging Technologies and Innovative Research): a system that detects and recognises objects in real time and speaks them aloud, to help blind users understand what is around them.',secs:[['Why it matters',['On a car, a robot or a camera, a detection that arrives late is a detection that missed','The confidence threshold is where you trade false alarms against missed objects, which is what the demo lets you feel']]],stack:['Object detection','Computer vision','Real-time systems']},
     hyper:{meta:'MTech thesis · Jain University · Gold Medalist',title:'Hyperspectral image reconstruction',lead:'Reconstructing images across many narrow spectral bands, far beyond the red, green and blue a normal camera sees.',secs:[['Why it matters',['Hyperspectral data reveals material properties invisible to the eye, with uses from agriculture to medical imaging','Reconstructing it computationally makes that information cheaper to capture']],['Recognition',['Gold Medalist in an AICTE-funded MTech in Data Science']]],stack:['Spectral imaging','Deep learning','Reconstruction']},
     caprus:{meta:'CaprusIT · AI & ML Developer · Mar 2023 to May 2026 · Hyderabad',title:'Production AI at CaprusIT',lead:'I designed and deployed production AI across mental wellness, AI-driven media and aviation, and mentored the interns and freshers who joined us.',secs:[['Menthra · AI mental wellness',['LLM-based therapy chat with RAG personalisation','NLP modules for emotion analysis and intent detection','Talking avatars via HeyGen, text-to-speech via ElevenLabs, speech-to-text via Whisper','Deployed on Azure']],['Aauti · AI avatar marketplace',['The avatar video generation pipeline, using computer vision and HeyGen','Voice cloning R&D with Wav2Lip lip-sync','A modular microservice architecture']],['EmpowerMX · aviation maintenance (MRO)',['ML pipelines using BERT embeddings for maintenance records','Clustering, classification and recommendation models','Production inference on AWS SageMaker, ECS, S3 and EventBridge']],['Mentoring',['Trained interns and freshers on ML pipelines, backend systems and production workflows']]],stack:['Python','PyTorch','TensorFlow','FastAPI','LangChain','Azure','AWS','Docker']},
-    waste:{meta:'Embedded World North America · Anaheim · Sep 2026',title:'Machine-vision waste sorter',lead:'I led a team of four to runner-up in the ASUS-sponsored Sustainability Challenge: a vision system that sorts waste on a conveyor, built in two days.',stats:[['Runner-up','Sustainability track'],['12','teams at the event'],['83.3%','test accuracy'],['7','material classes']],secs:[['What we built',['A MobileNetV3-Small classifier deployed through ONNX Runtime on the Qualcomm QRB2210-based Arduino UNO Q','Seven material classes, routed to compost, recycling or trash','Trained on RealWaste and TrashNet, mixed with our own validation data','Linux-side Python inference integrated with the STM32U585 firmware','An OLED display driver ported to the board\'s Zephyr-based core, so every decision shows on screen']],['The constraint',['The conveyor had a DC motor but no servo, so nothing could push an item into a bin. We put everything into getting the classification right and making the call obvious on the display','Next version: an actuator']]],stack:['MobileNetV3','ONNX Runtime','Arduino UNO Q','App Lab','STM32U585','Zephyr','Python']},
+    waste:{meta:'Embedded World North America · Anaheim · Sep 2026',title:'Machine-vision waste sorter',lead:'I led a team of four to runner-up in the ASUS-sponsored Sustainability Challenge: a vision system that sorts waste on a conveyor, built in two days.',stats:[['Runner-up','Sustainability track'],['12','teams at the event'],['83.3%','test accuracy'],['7','material classes']],secs:[['What we built',['A MobileNetV3-Small classifier deployed through ONNX Runtime on the Qualcomm QRB2210-based Arduino UNO Q','Seven material classes, routed to compost, recycling or trash','Trained on RealWaste and TrashNet, mixed with our own validation data','Linux-side Python inference integrated with the STM32U585 firmware','An OLED display driver ported to the board\'s Zephyr-based core, so every decision shows on screen']],['The constraint',['The conveyor was too small for real trash and had a DC motor but no servo, so nothing could push an item into a bin','We could have overfit to the few demo pieces on the table. We built for real waste instead, which cost us first place: the winner trained on about 200 images of the demo items']],['Next',['Continuing it as a side project: real waste and an actuator that actually sorts']]],stack:['MobileNetV3','ONNX Runtime','Arduino UNO Q','App Lab','STM32U585','Zephyr','Python']},
     cordic:{meta:'SJSU EE 271 · team of four · Sep 2026 to now',title:'Pipelined fixed-point CORDIC engine',lead:'A parameterized, pipelined CORDIC engine in SystemVerilog for field-oriented motor control. It turns stationary-frame components and rotor angle into motor-aligned d/q components using only shifts and adds.',secs:[['My piece',['The parameterized barrel shifter that performs every 2⁻ⁱ shift']],['The project',['Configurable word width and pipeline depth','Synthesis of several configurations to compare accuracy, latency, clock frequency and resource use','Verification with a self-checking testbench against a software reference model']],['Why it matters',['Motor controllers run these transforms continuously. CORDIC does trigonometry without multipliers: give up a little precision, win area, power and clock speed']]],stack:['SystemVerilog','Fixed-point','Pipelining','Verification']},
     cardy:{meta:'GVP College of Engineering · BTech · Dec 2018 to Apr 2019',title:'Cardy Heart',lead:'A solar-powered biomedical wearable that tracks heart signals, pulse and motion, and alerts a phone when something looks wrong.',secs:[['What we built',['Integrated AD8232 ECG, pulse-rate and ADXL335 accelerometer sensors','Read them through an MCP3008 SPI ADC, with a 0.96-inch I²C OLED display','Ran it all on a solar-powered Raspberry Pi']],['My part',['Led the team of four','Wrote the acquisition firmware, the alerts and the Android communication']],['Next',['Taking it from prototype wiring to a custom PCB']]],stack:['Raspberry Pi','AD8232 ECG','ADXL335','MCP3008','SPI','I²C','Android']}
   };
+  /* missed-brake sweep, from eval/results/threshold_sweep.csv in the fastdepth-zynq-fixedpoint repo (654 NYU Depth v2 test images) */
+  const SW = {x0:0.9, dx:0.05, s:[
+    ['FP32 and INT16','#1f8a63','',[1,1,1,1,1,.9583,.9143,.9091,.8846,.8676,.8,.7374,.7143,.6538,.5714,.4877,.4677,.4126,.3983,.3822,.3395,.3136,.268,.2346,.2199,.2129,.1786,.1832,.1586,.1589,.16,.1409,.1289,.125,.1181,.101,.0904,.1033,.0958,.0904,.0798,.0679,.0636]],
+    ['INT8','#c4552b','6 4',[1,1,1,1,1,.9167,.9429,.9318,.9038,.9118,.8125,.8182,.7143,.7231,.7347,.5617,.586,.4417,.4407,.4672,.3506,.3659,.2647,.284,.2962,.2381,.239,.1859,.1918,.2029,.1482,.1545,.1267,.1379,.1477,.1072,.1165,.0975,.1092,.113,.0872,.0936,.0564]],
+    ['Mixed','#5b5fc7','1.5 4',[1,1,1,1,1,.9583,.9714,.9545,.9038,.9265,.875,.8687,.7857,.7462,.7075,.6481,.5914,.534,.4915,.4479,.4059,.3693,.3333,.3117,.2991,.2633,.2418,.233,.2097,.1858,.1647,.1477,.1489,.1444,.1435,.1278,.1145,.117,.1111,.1092,.0983,.0899,.0818]]]};
+  let VW = 600, VH = 290, ML = 44, MR = 96, MT = 12, MB = 40, PW = VW-ML-MR, PH = VH-MT-MB;
+  const sx = v=>ML+(v-0.9)/2.1*PW, sy = v=>MT+(1-v)*PH;
+  function sweepSVG(){
+    const sm = phoneMQ.matches; VW = sm ? 360 : 600; VH = sm ? 300 : 290; ML = sm ? 40 : 44; MR = sm ? 104 : 96; PW = VW-ML-MR; PH = VH-MT-MB;
+    let g = '';
+    [0,.25,.5,.75,1].forEach(v=>{ g += `<line class="gl" x1="${ML}" x2="${ML+PW}" y1="${sy(v)}" y2="${sy(v)}"/><text class="ax" x="${ML-8}" y="${sy(v)+3.5}" text-anchor="end">${Math.round(v*100)}%</text>`; });
+    (sm?[1,2,3]:[1,1.5,2,2.5,3]).forEach(v=>{ g += `<text class="ax" x="${sx(v)}" y="${MT+PH+18}" text-anchor="middle">${v} m</text>`; });
+    g += `<text class="ax" x="${ML+PW/2}" y="${VH-4}" text-anchor="middle">brake distance threshold</text>`;
+    g += `<line x1="${sx(1.65)}" x2="${sx(1.65)}" y1="${MT}" y2="${MT+PH}" stroke="rgba(31,26,21,.35)" stroke-dasharray="3 3"/><text class="ax" x="${sx(1.65)+5}" y="${MT+10}">2 m/s</text>`;
+    const ends = SW.s.map(([n,c,da,v])=>{ const pts = v.map((y,i)=>`${sx(SW.x0+i*SW.dx).toFixed(1)},${sy(y).toFixed(1)}`).join(' ');
+      g += `<polyline class="ln" points="${pts}" stroke="${c}"${da?` stroke-dasharray="${da}"`:''}/>`; return [n,c,sy(v[v.length-1])]; });
+    // direct labels at the right end, nudged apart
+    ends.sort((a,b)=>a[2]-b[2]); for(let i=1;i<ends.length;i++) if(ends[i][2]-ends[i-1][2] < 14) ends[i][2] = ends[i-1][2]+14;
+    ends.forEach(([n,c,y])=>{ g += `<line x1="${ML+PW+4}" x2="${ML+PW+14}" y1="${y}" y2="${y}" stroke="${c}" stroke-width="2"/><text class="lab" x="${ML+PW+18}" y="${y+4}">${n==='FP32 and INT16'?'FP32, INT16':n}</text>`; });
+    g += `<line class="cx" x1="0" x2="0" y1="${MT}" y2="${MT+PH}" stroke="#1f1a15" stroke-width="1" opacity="0"/>`;
+    SW.s.forEach(([n,c],k)=>{ g += `<circle class="dot" data-k="${k}" r="4" fill="${c}" stroke="#f5eddd" stroke-width="2" opacity="0"/>`; });
+    g += `<rect class="hit" x="${ML}" y="${MT}" width="${PW}" height="${PH}" fill="transparent"/>`;
+    return `<h4>Missed brake decisions</h4><div class="sweep${sm?' sm':''}"><svg viewBox="0 0 ${VW} ${VH}" role="img" aria-label="Missed-brake rate by brake distance for FP32, INT16, INT8 and mixed precision. At the 2 metres per second threshold of 1.65 m: FP32 and INT16 miss 49 percent, INT8 56 percent, mixed 65 percent.">${g}</svg><div class="tip"></div><p class="cap">Share of frames that needed a brake but were not flagged, across brake thresholds (654 NYU Depth v2 test images). INT16 sits on top of FP32. At the 2 m/s threshold (1.65 m): FP32 49%, INT8 56%, mixed 65%. Lower is better.</p></div>`;
+  }
+  function sweepInit(){
+    const box = document.querySelector('.sweep'); if(!box) return; const svg = box.querySelector('svg'), tip = box.querySelector('.tip'), cx = svg.querySelector('.cx'), dots = [...svg.querySelectorAll('.dot')], hit = svg.querySelector('.hit');
+    const show = e=>{ const r = svg.getBoundingClientRect(), k = VW/r.width, vx = (e.clientX-r.left)*k; const i = Math.max(0, Math.min(SW.s[0][3].length-1, Math.round(((vx-ML)/PW*2.1)/SW.dx)));
+      const X = sx(SW.x0+i*SW.dx); cx.setAttribute('x1',X); cx.setAttribute('x2',X); cx.setAttribute('opacity',.35);
+      dots.forEach((d,j)=>{ d.setAttribute('cx',X); d.setAttribute('cy',sy(SW.s[j][3][i])); d.setAttribute('opacity',1); });
+      tip.innerHTML = `${(SW.x0+i*SW.dx).toFixed(2)} m<br>`+SW.s.map(([n,c,da,v])=>`<i style="background:${c}"></i>${n}: ${Math.round(v[i]*100)}%`).join('<br>');
+      tip.style.opacity = 1; const px = X/k, left = px > r.width*0.55 ? px-tip.offsetWidth-12 : px+12; tip.style.left = left+'px'; tip.style.top = '6px'; };
+    const hide = ()=>{ tip.style.opacity = 0; cx.setAttribute('opacity',0); dots.forEach(d=>d.setAttribute('opacity',0)); };
+    hit.addEventListener('pointermove', show); hit.addEventListener('pointerdown', show); hit.addEventListener('pointerleave', hide);
+  }
   const esc = s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  P.fpga.chart = sweepSVG; P.fpga.chartInit = sweepInit;
   document.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{
     const d = P[b.dataset.rm]; if(!d) return;
     $('#mMeta').textContent = d.meta; $('#mTitle').textContent = d.title;
     let h = `<p>${esc(d.lead)}</p>`;
     if(d.stats) h += `<div class="stats">${d.stats.map(s=>`<div><b${s[0].length>7?' class="long"':''}>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join('')}</div>`;
+    if(d.chart) h += d.chart();
     d.secs.forEach(([t,items])=>{ h += `<h4>${esc(t)}</h4><ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`; });
     h += `<h4>Tools</h4><div class="rchips">${d.stack.map(s=>`<span>${esc(s)}</span>`).join('')}</div>`;
     if(d.link) h += `<h4>See the work</h4><p><a href="${d.link[1]}" target="_blank" rel="noopener" style="color:var(--rust)">${esc(d.link[0])} ↗</a></p>`;
     if(d.note) h += `<p style="font-size:15px;color:var(--mute);font-style:italic;margin-top:20px">${esc(d.note)}</p>`;
-    $('#mBody').innerHTML = h; $('#modal').classList.add('on'); $('#modal').scrollTop = 0; document.body.style.overflow = 'hidden';
+    $('#mBody').innerHTML = h; if(d.chartInit) d.chartInit(); $('#modal').classList.add('on'); $('#modal').scrollTop = 0; document.body.style.overflow = 'hidden';
   }));
 })();
 
