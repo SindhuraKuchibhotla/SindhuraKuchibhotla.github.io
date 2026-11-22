@@ -354,9 +354,10 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
     <div class="txt">
       <div class="tag">IISc Bangalore · thesis</div>
       <h3>Monocular depth estimation</h3>
-      <p>Seeing depth from a single camera, the way a car or robot has to when there's no second lens or LiDAR to lean on. My U-Net with a DenseNet-201 encoder reached 85.81% test accuracy, above the 85% published benchmark, and I'm now quantizing it for an FPGA.</p>
+      <p>Seeing depth from a single camera, the way a car or robot has to when there's no second lens or LiDAR to lean on. My U-Net with a DenseNet-201 encoder reached 85.81% test accuracy, above the 85% published benchmark.</p>
+      <p>At SJSU I took depth onto an FPGA: an INT8 Vitis HLS kernel for FastDepth's first layer on a Zynq-7000 runs in <b>4.02 ms on the board, 11.7x faster than NEON-optimized ARM code</b>, bit-exact against the fixed-point model. <a href="https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint" target="_blank" rel="noopener" style="color:var(--rust)">Code and results on GitHub &rarr;</a></p>
       <p>Drag the line across the street to switch between what the camera sees and the depth a model would estimate.</p>
-      <div class="chips"><span>U-Net</span><span>DenseNet-201</span><span>depth</span><span>computer vision</span></div>
+      <div class="chips"><span>U-Net</span><span>DenseNet-201</span><span>depth</span><span>computer vision</span><span>Vitis HLS</span><span>Zynq-7000</span><span>INT8</span></div>
       <button class="rm" data-rm="depth">Read more &rarr;</button>
     </div>
     <div class="demo"><div class="dlabel">RGB ⟷ depth</div><div class="illu">illustration</div><canvas id="dDepth" width="720" height="440"></canvas>
@@ -524,9 +525,8 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
   <div class="pins">
     <a class="pin" href="https://www.linkedin.com/in/sindhura-kuchibhotla-7855b9aa" target="_blank" rel="noopener"><div class="leg"></div><b>LinkedIn</b><span>pin 01</span></a>
     <a class="pin" href="https://github.com/SindhuraKuchibhotla" target="_blank" rel="noopener"><div class="leg"></div><b>GitHub</b><span>pin 02</span></a>
-    <a class="pin todo" href="#contact"><div class="leg"></div><b>Résumé</b><span>pin 03 · add link</span></a>
-    <a class="pin todo" href="#contact"><div class="leg"></div><b>Scholar</b><span>pin 04 · add link</span></a>
-    <a class="pin todo" href="#contact"><div class="leg"></div><b>Email</b><span>pin 05 · add</span></a>
+    <a class="pin" href="resume.pdf" target="_blank" rel="noopener"><div class="leg"></div><b>Résumé</b><span>pin 03</span></a>
+    <a class="pin" href="mailto:kuchibhotlasindhura9@gmail.com"><div class="leg"></div><b>Email</b><span>pin 04</span></a>
   </div>
   <div class="chipbar">SK · EDGE AI</div>
 </section>
@@ -867,7 +867,7 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
     ["BTech","I did my BTech in Electrical and Electronics Engineering at GVPCE(A), where I was NSS coordinator for 100+ volunteers, an IEEE student body executive, and in Rotaract."],
     ["Paper","I published a paper on real-time object detection."],
     ["Hackathon","At the 2026 Embedded World North America Edge AI Hackathon I led my team to runner-up in the Sustainability track, building a machine-vision waste sorter on an Arduino Uno Q board."],
-    ["Hardware","Hardware I've built: a waste-sorting vision system on Arduino Uno Q, the Cardy Heart wearable on a Raspberry Pi, a barrel shifter for our team's SystemVerilog CORDIC engine, and a depth network split across ARM and FPGA on a Zynq-7000. Next: custom PCBs."],
+    ["Hardware","Hardware I've built: a waste-sorting vision system on Arduino Uno Q, the Cardy Heart wearable on a Raspberry Pi, a barrel shifter for our team's SystemVerilog CORDIC engine, and an INT8 FPGA kernel for depth estimation on a Zynq-7000 that runs 11.7x faster than NEON. Next: custom PCBs."],
     ["Internships","I'm looking for Summer 2027 internships in FPGA, hardware, embedded systems, perception and edge AI."],
     ["Life","Outside work I love aviation, space and astronomy, cooking and baking, arts and crafts, playing tennis and badminton, and watching almost any sport, especially multi-sport events, from chess to cricket. I speak English, Telugu and Hindi."],
     ["Goal","Long term I want to be an ML hardware architect: designing the chips and accelerators that AI runs on."]
@@ -1053,7 +1053,7 @@ end koluvu steps */
 /* project read-more pages */
 (function(){
   const P = {
-    depth:{meta:'IISc Bangalore · Sep to Nov 2023',title:'Monocular depth estimation',lead:'Recovering depth from a single camera image, the kind of perception that lets a cheap sensor understand distance.',stats:[['85.81%','test accuracy'],['85%','published benchmark']],secs:[['What I built',['A U-Net with a DenseNet-201 encoder for single-image depth estimation','Trained and evaluated it against a published benchmark, and beat it']],['What happened next',['At SJSU I am quantizing this network and splitting it across the ARM cores and FPGA fabric of a Zynq-7000 (Zybo Z7)','A streaming convolution kernel in Vitis HLS, with AXI and DMA data movement between the two sides','Pass/fail criteria against a floating-point reference, and a planned INT8 vs INT16 comparison of depth error, latency, power and resources']]],stack:['U-Net','DenseNet-201','Computer vision','Vitis HLS','Zynq-7000']},
+    depth:{meta:'IISc Bangalore · Sep to Nov 2023',title:'Monocular depth estimation',lead:'Recovering depth from a single camera image, the kind of perception that lets a cheap sensor understand distance.',stats:[['85.81%','test accuracy'],['4.02 ms','FPGA kernel on board'],['11.7x','faster than NEON']],secs:[['What I built',['A U-Net with a DenseNet-201 encoder for single-image depth estimation','Trained and evaluated it against a published benchmark, and beat it']],['What happened next: FPGA acceleration at SJSU',['Took FastDepth (a lightweight depth network) onto a Zynq-7000 (Zybo Z7-10), splitting work between the ARM cores and the FPGA fabric','Wrote a streaming, line-buffered INT8 convolution kernel in Vitis HLS with AXI DMA, and benchmarked it bare-metal against scalar and NEON ARM code','4.02 ms on the board, 11.7x faster than NEON INT8 and 38.8x faster than scalar FP32, with 0 of 401,408 outputs differing from the fixed-point golden model','Compared FP32, INT16, INT8 and mixed precision on NYU Depth v2 using a braking model: mixed precision beat INT8 on RMSE but missed more brake decisions, so precision should be chosen against the task, not just the benchmark']]],stack:['U-Net','DenseNet-201','Computer vision','Vitis HLS','Zynq-7000','AXI DMA','ARM NEON','INT8'],link:'https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint'},
     detect:{meta:'Published paper',title:'Real-time object detection',lead:'Research on detecting objects fast enough to act on, where latency matters as much as accuracy.',secs:[['Why it matters',['On a car, a robot or a camera, a detection that arrives late is a detection that missed','The confidence threshold is where you trade false alarms against missed objects, which is what the demo lets you feel']]],stack:['Object detection','Computer vision','Real-time systems'],note:'Paper title, venue and link coming soon.'},
     hyper:{meta:'MTech thesis · Jain University · Gold Medalist',title:'Hyperspectral image reconstruction',lead:'Reconstructing images across many narrow spectral bands, far beyond the red, green and blue a normal camera sees.',secs:[['Why it matters',['Hyperspectral data reveals material properties invisible to the eye, with uses from agriculture to medical imaging','Reconstructing it computationally makes that information cheaper to capture']],['Recognition',['Gold Medalist in an AICTE-funded MTech in Data Science']]],stack:['Spectral imaging','Deep learning','Reconstruction'],note:'More detail coming soon.'},
     caprus:{meta:'CaprusIT · AI & ML Developer · Mar 2023 to May 2026 · Hyderabad',title:'Production AI at CaprusIT',lead:'I designed and deployed production AI across mental wellness, AI-driven media and aviation, and mentored the interns and freshers who joined us.',secs:[['Menthra · AI mental wellness',['LLM-based therapy chat with RAG personalisation','NLP modules for emotion analysis and intent detection','Talking avatars via HeyGen, text-to-speech via ElevenLabs, speech-to-text via Whisper','Deployed on Azure']],['Aauti · AI avatar marketplace',['The avatar video generation pipeline, using computer vision and HeyGen','Voice cloning R&D with Wav2Lip lip-sync','A modular microservice architecture']],['EmpowerMX · aviation maintenance (MRO)',['ML pipelines using BERT embeddings for maintenance records','Clustering, classification and recommendation models','Production inference on AWS SageMaker, ECS, S3 and EventBridge']],['Mentoring',['Trained interns and freshers on ML pipelines, backend systems and production workflows']]],stack:['Python','PyTorch','TensorFlow','FastAPI','LangChain','Azure','AWS','Docker']},
@@ -1069,6 +1069,7 @@ end koluvu steps */
     if(d.stats) h += `<div class="stats">${d.stats.map(s=>`<div><b>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join('')}</div>`;
     d.secs.forEach(([t,items])=>{ h += `<h4>${esc(t)}</h4><ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`; });
     h += `<h4>Tools</h4><div class="rchips">${d.stack.map(s=>`<span>${esc(s)}</span>`).join('')}</div>`;
+    if(d.link) h += `<p style="margin-top:20px"><a href="${d.link}" target="_blank" rel="noopener" style="color:var(--rust)">Code, reports and results on GitHub &rarr;</a></p>`;
     if(d.note) h += `<p style="font-size:15px;color:var(--mute);font-style:italic;margin-top:20px">${esc(d.note)}</p>`;
     $('#mBody').innerHTML = h; $('#modal').classList.add('on'); $('#modal').scrollTop = 0; document.body.style.overflow = 'hidden';
   }));
