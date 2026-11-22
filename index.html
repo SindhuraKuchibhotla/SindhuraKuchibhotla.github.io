@@ -383,20 +383,43 @@ html.stage .boot{padding-top:12vh}
 html.sigon .sig{display:block}
 .sig path{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .sig .trk{stroke-width:2}
-.sig .halo{stroke-width:8;opacity:.2}
-.sig .core{stroke-width:2.4}
+.sig .halo{stroke-width:12;opacity:.32}
+.sig .core{stroke-width:3.2}
 .sig .stub{stroke-width:2;transition:stroke-dashoffset .45s ease-out}
 .sig .via{stroke-width:1.5;transition:fill .35s,stroke .35s}
 .sig .tap.d .stub{stroke:#f0cf7a}.sig .tap.l .stub{stroke:#b5532a}
 .sig .tap.d .via{fill:#111613;stroke:rgba(212,168,75,.45)}.sig .tap.l .via{fill:#f5eddd;stroke:rgba(31,26,21,.3)}
-.sig .tap.d.on .via{fill:#f0cf7a;stroke:#f0cf7a}.sig .tap.l.on .via{fill:#b5532a;stroke:#b5532a}
-.sig .head.d{fill:#fff3c9}.sig .head.l{fill:#b5532a}
-.sig .glow.d{fill:rgba(240,207,122,.35)}.sig .glow.l{fill:rgba(181,83,42,.25)}
+.sig .tap.d.on .via{fill:rgba(217,180,86,.55);stroke:rgba(217,180,86,.7)}.sig .tap.l.on .via{fill:rgba(173,100,71,.5);stroke:rgba(173,100,71,.6)}
+.sig .tap.hot .via{fill:#d9b456;stroke:#d9b456;filter:drop-shadow(0 0 6px rgba(217,180,86,.95))}
+.sig .tap.d.on .stub{stroke:rgba(217,180,86,.55)}.sig .tap.l.on .stub{stroke:rgba(173,100,71,.45)}.sig .tap.hot .stub{stroke:#d9b456}
+.sig .head.d{fill:#fff3c9}.sig .head.l{fill:#d9b456;stroke:#ad6447;stroke-width:1}
+.sig .glow.d{fill:rgba(240,207,122,.35)}.sig .glow.l{fill:rgba(217,180,86,.35)}
 html.sigon .pin .leg{transition:height .3s,box-shadow .5s,opacity .5s}
 html.sigon .pin:not(.sig-on) .leg{opacity:.4}
 html.sigon .pin.sig-on .leg{box-shadow:0 0 16px rgba(240,207,122,.7)}
 html.sigon .chipbar{transition:color .6s,border-color .6s,box-shadow .6s}
 html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,122,.75);box-shadow:0 0 30px rgba(212,168,75,.22)}
+.hero-text .nm{font-family:var(--serif);font-size:clamp(22px,2.2vw,30px);color:var(--cream);margin:-4px 0 14px;letter-spacing:.01em}
+.hero-text .hbtn{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;pointer-events:auto}
+.hero-text .hbtn a{font-family:var(--mono);font-size:13px;letter-spacing:.04em;padding:11px 18px;border-radius:999px;border:1px solid rgba(240,207,122,.55);color:var(--gold2);text-decoration:none;transition:background .2s,color .2s}
+.hero-text .hbtn a.go{background:var(--gold2);color:#14231c;border-color:var(--gold2)}
+.hero-text .hbtn a:hover{background:var(--gold2);color:#14231c}
+.hero-text.gone .hbtn{visibility:hidden}
+.hero-text .who{margin-top:18px}
+@media(min-width:601px){.hero-text{bottom:max(10vh,calc(50vh - 250px))}}
+.work .group{scroll-margin-top:84px}
+.sig-lit{animation:siglit 3.6s ease-out}
+h2.sig-lit{animation-name:siglith;position:relative}
+h2.sig-lit::after{content:"";position:absolute;left:-6px;right:-6px;bottom:.08em;height:.32em;background:rgba(231,180,90,.42);border-radius:4px;z-index:-1;transform-origin:left;animation:sigband 3.6s cubic-bezier(.3,0,.2,1) forwards}
+@keyframes sigband{0%{transform:scaleX(0);opacity:1}22%{transform:scaleX(1);opacity:1}70%{transform:scaleX(1);opacity:1}100%{transform:scaleX(1);opacity:0}}
+.sec-head h2,.about h2{isolation:isolate}
+@keyframes siglith{0%{text-shadow:none}12%{text-shadow:0 0 26px rgba(231,180,90,.95),0 0 4px rgba(231,180,90,.8)}50%{text-shadow:0 0 18px rgba(231,180,90,.55)}100%{text-shadow:0 0 0 rgba(231,180,90,0)}}
+@keyframes siglit{0%{color:inherit;text-shadow:none}12%{color:#e7b45a;text-shadow:0 0 16px rgba(231,180,90,1)}50%{color:#e7b45a;text-shadow:0 0 10px rgba(231,180,90,.6)}100%{text-shadow:0 0 0 rgba(231,180,90,0)}}
+@media(prefers-reduced-motion:reduce){.sig-lit{animation:none}}
+.sig-box{animation:sigbox 2.2s ease-out}
+@keyframes sigbox{0%{outline:3px solid rgba(231,180,90,0);outline-offset:14px}16%{outline:3px solid rgba(231,180,90,1);outline-offset:4px}55%{outline:3px solid rgba(231,180,90,.7);outline-offset:4px}100%{outline:3px solid rgba(231,180,90,0);outline-offset:4px}}
+@media(prefers-reduced-motion:reduce){.sig-box{animation:none}}
+.sig .edge{stroke:#e7b45a;stroke-width:2.5;opacity:0;filter:drop-shadow(0 0 6px rgba(231,180,90,.9))}
 </style>
 </head>
 <body>
@@ -415,9 +438,11 @@ html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,12
     <canvas id="board" aria-hidden="true"></canvas>
     <div class="hero-text" id="heroText">
       <div class="k"><i></i>MSEE · San José State University</div>
+      <div class="nm">Sindhura Kuchibhotla</div>
       <h1>I build AI that runs on <em>real hardware.</em></h1>
       <p>Three years shipping production AI. Now going down the stack: digital design, RTL, FPGAs and silicon.</p>
-      <div class="who">Sindhura (Ananta) Kuchibhotla · Digital Design · FPGA · Edge AI · Perception</div>
+      <div class="hbtn"><a href="#build" class="go">View hardware projects</a><a href="resume.pdf" target="_blank" rel="noopener">Résumé ↗</a></div>
+      <div class="who">Digital Design · FPGA · Edge AI · Perception</div>
     </div>
     <div class="cue">Scroll into the chip ↓</div>
     <div class="fade" id="fade"></div>
@@ -449,71 +474,8 @@ html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,12
 
 <section class="work" id="work">
   <div class="sec-head rv">
-    <div><div class="eyebrow">Selected work</div><h2>Things I've built, <em>running live.</em></h2></div>
-    <p>Each project comes with a small demo you can play with right here. They're simplified sketches of the idea, not the real models.</p>
-  </div>
-
-  <div class="group" id="sense">SENSE · perception</div>
-
-  <div class="proj rv">
-    <div class="txt">
-      <div class="tag">IISc Bangalore · group of four · 2023</div>
-      <h3>Monocular depth estimation</h3>
-      <p>Seeing depth from a single camera, the way a car or robot has to when there's no second lens or LiDAR to lean on. At IISc, our group of four compared four U-Net encoders on NYU Depth V2 and chose a DenseNet-201 U-Net with a custom SSIM, edge and cosine loss. Test accuracy: 85.81% (Keras accuracy metric).</p>
-      <p>Drag the line across the street to switch between what the camera sees and the depth a model would estimate.</p>
-      <div class="chips"><span>U-Net</span><span>DenseNet-201</span><span>depth</span><span>computer vision</span></div>
-      <button class="rm" data-rm="depth">Read more &rarr;</button>
-    </div>
-    <div class="demo"><div class="dlabel">RGB ⟷ depth</div><div class="illu">illustration</div><canvas id="dDepth" width="720" height="440"></canvas>
-      <div class="dbar"><span>Drag on the image</span><span style="margin-left:auto">near <span style="color:#fcffa4">■</span> → far <span style="color:#57106e">■</span></span></div></div>
-  </div>
-
-  <div class="proj flip rv">
-    <div class="txt">
-      <div class="tag">Published paper · JETIR</div>
-      <h3>Object detection with voice feedback</h3>
-      <p>A system that detects and recognises objects in real time and says them out loud, so a blind user knows what is in front of them. Speed matters as much as accuracy, and the confidence threshold is where you choose.</p>
-      <p>Slide the threshold: low lets noise through, high starts missing real objects.</p>
-      <div class="chips"><span>detection</span><span>real-time</span><span>edge inference</span></div>
-      <button class="rm" data-rm="detect">Read more &rarr;</button>
-    </div>
-    <div class="demo"><div class="dlabel">live detector</div><div class="illu">illustration</div><canvas id="dDet" width="720" height="440"></canvas>
-      <div class="dbar"><label>confidence ≥ <input type="range" id="thr" min="0.1" max="0.95" step="0.01" value="0.5"><span id="thrV">0.50</span></label><span id="detStat"></span></div></div>
-  </div>
-
-  <div class="proj rv">
-    <div class="txt">
-      <div class="tag">Jain University · MTech thesis · gold medal</div>
-      <h3>Hyperspectral image reconstruction</h3>
-      <p>A normal camera sees three colors. A hyperspectral one sees dozens of narrow bands, including near-infrared where leaves glow bright.</p>
-      <p>Sweep the wavelength. Watch the leaves light up past 700 nm, where your eyes can't follow.</p>
-      <div class="chips"><span>spectral imaging</span><span>deep learning</span><span>reconstruction</span></div>
-      <button class="rm" data-rm="hyper">Read more &rarr;</button>
-    </div>
-    <div class="demo"><div class="dlabel">spectral bands</div><div class="illu">illustration</div><canvas id="dHsi" width="720" height="440"></canvas>
-      <div class="dbar"><label>λ <input type="range" id="lam" min="400" max="850" step="1" value="550"><span id="lamV">550 nm</span></label></div></div>
-  </div>
-
-  <div class="group" id="think">THINK · models</div>
-
-  <div class="proj flip rv">
-    <div class="txt">
-      <div class="tag">CaprusIT · AI &amp; ML Developer · Mar 2023 to May 2026</div>
-      <h3>Production AI: LLMs, vision and recommendations</h3>
-      <p>Over three years I built production AI across three products: <b>Menthra</b>, an LLM therapy companion with RAG, emotion and intent detection and a talking avatar; <b>Aauti</b>, computer vision and avatar video pipelines with Wav2Lip voice cloning R&amp;D; and <b>EmpowerMX</b>, BERT embeddings, clustering, classification and recommendation models for aviation maintenance on AWS. I also mentored the interns and freshers who joined the team.</p>
-      <p>Try a tiny version: ask anything about me. It searches a handful of facts and answers from the best match.</p>
-      <div class="chips"><span>LLMs</span><span>RAG</span><span>computer vision</span><span>BERT</span><span>AWS · Azure</span><span>mentoring</span></div>
-      <button class="rm" data-rm="caprus">Read more &rarr;</button>
-    </div>
-    <div class="demo"><div class="dlabel" style="position:static;display:inline-block;margin-bottom:10px">ask my résumé</div>
-      <div class="rag">
-        <div class="ragq"><input id="ragIn" placeholder="e.g. What hardware has she built?" aria-label="Ask a question"><button id="ragGo">Ask</button></div>
-        <div class="presets" id="presets"></div>
-        <div class="hits" id="hits"></div>
-        <div class="answer" id="ans">Ask something to see retrieval at work.</div>
-        <div class="dbar" style="margin-top:0"><span>Keyword retrieval running in your browser. No model, no server.</span></div>
-      </div>
-    </div>
+    <div><div class="eyebrow">Selected work</div><h2>Selected work, <em>explained interactively.</em></h2></div>
+    <p>Each project has a small interactive sketch of how it works. They're simplified illustrations, not the real models. Real board measurements are labelled as measured.</p>
   </div>
 
   <div class="group" id="build">BUILD · hardware</div>
@@ -522,10 +484,10 @@ html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,12
     <div class="txt">
       <div class="tag">SJSU · EE 295 · 2026</div>
       <h3>Fixed-point depth on a Zynq FPGA</h3>
-      <p>How much precision does an on-device depth network need, and what should run on the ARM cores versus the FPGA fabric? I answered both for FastDepth on a Zybo Z7-10. The first convolution layer, built as an INT8 kernel in Vitis HLS, runs in 4.02 ms on the board: 11.7× faster than ARM NEON, and bit-exact.</p>
+      <p>How much precision does an on-device depth network need, and what should run on the ARM cores versus the FPGA fabric? For FastDepth on a Zybo Z7-10, I evaluated the precision tradeoffs and accelerated the first convolution layer. Built as an INT8 kernel in Vitis HLS, it runs in 4.02 ms on the board: 11.7× faster than ARM NEON, and bit-exact.</p>
       <p>These are the times measured on the board. Hover or tap a bar to compare.</p>
       <div class="chips"><span>Vitis HLS</span><span>Vivado</span><span>AXI DMA</span><span>Zynq-7000</span><span>INT8 · INT16</span></div>
-      <button class="rm" data-rm="fpga">Read more &rarr;</button>
+      <button class="rm" data-rm="fpga">Read more &rarr;</button> <a class="rm" href="https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">Code on GitHub ↗</a>
     </div>
     <div class="demo"><div class="dlabel" style="position:static;display:inline-block;margin-bottom:4px">measured on the board</div>
       <div class="bars" id="fpgaBars"></div>
@@ -536,15 +498,15 @@ html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,12
 
   <div class="proj flip rv">
     <div class="txt">
-      <div class="tag">Embedded World NA · Edge AI Hackathon · Sep 2026</div>
-      <h3>Machine-vision waste sorter</h3>
-      <p>Two days, one Arduino Uno Q, a conveyor belt and a problem revealed on the morning of: sort waste into compost, recycling or trash and show the call on an OLED.</p>
-      <p>I led our team of four. Next step: the hackathon build had no actuator, so I'm adding one.</p>
-      <div class="badge">🏆 Runner-up · Sustainability track</div>
-      <div class="chips"><span>Arduino Uno Q</span><span>App Lab</span><span>vision</span><span>team lead</span></div>
-      <button class="rm" data-rm="waste">Read more &rarr;</button>
+      <div class="tag">SJSU EE 277 · team of four · I lead · in progress</div>
+      <h3>Hindsight Lamp</h3>
+      <p>An overhead lamp with a camera that remembers where things were left. When something is put down or moved, the FPGA notices the change and the ARM core records what it was, where and when. Press the item's key and a pan-tilt spotlight lights it up, while the HDMI screen shows when it was last seen. It never records video, only a short log of changes.</p>
+      <p>My piece: I'm leading the team and own the change detector (reference frame in BRAM, event FIFO and interrupt to the ARM), the item map on the ARM, and the Vivado block design and integration.</p>
+      <div class="chips"><span>SystemVerilog</span><span>Zynq-7000</span><span>Pcam 5C</span><span>BRAM</span><span>AXI</span><span>interrupts</span></div>
+      <button class="rm" data-rm="hind">Read more &rarr;</button>
     </div>
-    <div class="demo"><div class="dlabel">conveyor cam</div><div class="illu">illustration</div><canvas id="dWaste" width="720" height="440"></canvas></div>
+    <div class="demo"><div class="dlabel">what the lamp sees</div><div class="illu">illustration</div><canvas id="dHind" width="720" height="380"></canvas>
+      <div class="dbar" id="hindBar"><span>find:</span></div></div>
   </div>
 
   <div class="proj rv">
@@ -563,15 +525,15 @@ html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,12
 
   <div class="proj flip rv">
     <div class="txt">
-      <div class="tag">SJSU EE 277 · team of four · I lead · in progress</div>
-      <h3>Hindsight Lamp</h3>
-      <p>An overhead lamp with a camera that remembers where things were left. When something is put down or moved, the FPGA notices the change and the ARM core records what it was, where and when. Press the item's key and a pan-tilt spotlight lights it up, while the HDMI screen shows when it was last seen. It never records video, only a short log of changes.</p>
-      <p>My piece: I'm leading the team and own the change detector (reference frame in BRAM, event FIFO and interrupt to the ARM), the item map on the ARM, and the Vivado block design and integration.</p>
-      <div class="chips"><span>SystemVerilog</span><span>Zynq-7000</span><span>Pcam 5C</span><span>BRAM</span><span>AXI</span><span>interrupts</span></div>
-      <button class="rm" data-rm="hind">Read more &rarr;</button>
+      <div class="tag">Embedded World NA · Edge AI Hackathon · Sep 2026</div>
+      <h3>Machine-vision waste sorter</h3>
+      <p>Two days, one Arduino Uno Q, a conveyor belt and a problem revealed on the morning of: sort waste into compost, recycling or trash and show the call on an OLED.</p>
+      <p>I led our team of four. Next step: the hackathon build had no actuator, so I'm adding one.</p>
+      <div class="badge">🏆 Runner-up · Sustainability track</div>
+      <div class="chips"><span>Arduino Uno Q</span><span>App Lab</span><span>vision</span><span>team lead</span></div>
+      <button class="rm" data-rm="waste">Read more &rarr;</button>
     </div>
-    <div class="demo"><div class="dlabel">what the lamp sees</div><div class="illu">illustration</div><canvas id="dHind" width="720" height="380"></canvas>
-      <div class="dbar" id="hindBar"><span>find:</span></div></div>
+    <div class="demo"><div class="dlabel">conveyor cam</div><div class="illu">illustration</div><canvas id="dWaste" width="720" height="440"></canvas></div>
   </div>
 
   <div class="proj rv">
@@ -584,6 +546,69 @@ html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,12
       <button class="rm" data-rm="cardy">Read more &rarr;</button>
     </div>
     <div class="demo"><div class="dlabel">signal</div><div class="illu">illustration</div><canvas id="dEcg" width="720" height="300"></canvas></div>
+  </div>
+
+  <div class="group" id="sense">SENSE · perception</div>
+
+  <div class="proj flip rv">
+    <div class="txt">
+      <div class="tag">IISc Bangalore · group of four · 2023</div>
+      <h3>Monocular depth estimation</h3>
+      <p>Seeing depth from a single camera, the way a car or robot has to when there's no second lens or LiDAR to lean on. At IISc, our group of four compared four U-Net encoders on NYU Depth V2 and chose a DenseNet-201 U-Net with a custom SSIM, edge and cosine loss.</p>
+      <p>Drag the line across the street to switch between what the camera sees and the depth a model would estimate.</p>
+      <div class="chips"><span>U-Net</span><span>DenseNet-201</span><span>depth</span><span>computer vision</span></div>
+      <button class="rm" data-rm="depth">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">RGB ⟷ depth</div><div class="illu">illustration</div><canvas id="dDepth" width="720" height="440"></canvas>
+      <div class="dbar"><span>Drag on the image</span><span style="margin-left:auto">near <span style="color:#fcffa4">■</span> → far <span style="color:#57106e">■</span></span></div></div>
+  </div>
+
+  <div class="proj rv">
+    <div class="txt">
+      <div class="tag">Jain University · MTech thesis · gold medal</div>
+      <h3>Hyperspectral image reconstruction</h3>
+      <p>A normal camera sees three colors. A hyperspectral one sees dozens of narrow bands, including near-infrared where leaves glow bright.</p>
+      <p>Sweep the wavelength. Watch the leaves light up past 700 nm, where your eyes can't follow.</p>
+      <div class="chips"><span>spectral imaging</span><span>deep learning</span><span>reconstruction</span></div>
+      <button class="rm" data-rm="hyper">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">spectral bands</div><div class="illu">illustration</div><canvas id="dHsi" width="720" height="440"></canvas>
+      <div class="dbar"><label>λ <input type="range" id="lam" min="400" max="850" step="1" value="550"><span id="lamV">550 nm</span></label></div></div>
+  </div>
+
+  <div class="proj flip rv">
+    <div class="txt">
+      <div class="tag">Published paper · JETIR</div>
+      <h3>Object detection with voice feedback</h3>
+      <p>A system that detects and recognises objects in real time and says them out loud, so a blind user knows what is in front of them. Speed matters as much as accuracy, and the confidence threshold is where you choose.</p>
+      <p>Slide the threshold: low lets noise through, high starts missing real objects.</p>
+      <div class="chips"><span>detection</span><span>real-time</span><span>edge inference</span></div>
+      <button class="rm" data-rm="detect">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">live detector</div><div class="illu">illustration</div><canvas id="dDet" width="720" height="440"></canvas>
+      <div class="dbar"><label>confidence ≥ <input type="range" id="thr" min="0.1" max="0.95" step="0.01" value="0.5"><span id="thrV">0.50</span></label><span id="detStat"></span></div></div>
+  </div>
+
+  <div class="group" id="think">THINK · models</div>
+
+  <div class="proj rv">
+    <div class="txt">
+      <div class="tag">CaprusIT · AI &amp; ML Developer · Mar 2023 to May 2026</div>
+      <h3>Production AI: LLMs, vision and recommendations</h3>
+      <p>Over three years I built production AI across three products: <b>Menthra</b>, an LLM therapy companion with RAG, emotion and intent detection and a talking avatar; <b>Aauti</b>, computer vision and avatar video pipelines with Wav2Lip voice cloning R&amp;D; and <b>EmpowerMX</b>, BERT embeddings, clustering, classification and recommendation models for aviation maintenance on AWS. I also mentored the interns and freshers who joined the team.</p>
+      <p>Try a tiny version: ask anything about me. It searches a handful of facts and answers from the best match.</p>
+      <div class="chips"><span>LLMs</span><span>RAG</span><span>computer vision</span><span>BERT</span><span>AWS · Azure</span><span>mentoring</span></div>
+      <button class="rm" data-rm="caprus">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel" style="position:static;display:inline-block;margin-bottom:10px">ask my résumé</div>
+      <div class="rag">
+        <div class="ragq"><input id="ragIn" placeholder="e.g. What hardware has she built?" aria-label="Ask a question"><button id="ragGo">Ask</button></div>
+        <div class="presets" id="presets"></div>
+        <div class="hits" id="hits"></div>
+        <div class="answer" id="ans">Ask something to see retrieval at work.</div>
+        <div class="dbar" style="margin-top:0"><span>Keyword retrieval running in your browser. No model, no server.</span></div>
+      </div>
+    </div>
   </div>
 
   <!-- Bommala Koluvu: hidden for now. Remove this comment wrapper to show it again.
@@ -906,7 +931,7 @@ function whenVisible(el, fn){
     lids.forEach(m=>{ const sd = m.userData.sd; m.position.set(sd*(LID_W/4+1.5*o), LID_Y+2.7*o*o, 0); m.rotation.z = -sd*0.7*o; m.castShadow = o > 0.01; m.visible = o < 1; });
     cavity.visible = dieA.visible = o > 0; dieB.visible = o > 0 && f < 1; dieB.material.opacity = 1-f;
     const txt = Math.max(0, 1-2*sp), fo = Math.min(f, sm((S-1)/0.1));
-    heroText.style.opacity = cue.style.opacity = txt; hero.style.setProperty('--hg', txt); heroText.style.transform = `translateY(${-sp*61.5}px)`;
+    heroText.style.opacity = cue.style.opacity = txt; heroText.classList.toggle('gone', txt < .05); hero.style.setProperty('--hg', txt); heroText.style.transform = `translateY(${-sp*61.5}px)`;
     pin.style.opacity = fo; pin.classList.toggle('on', fo > 0.6); pin.style.setProperty('--dim', (0.4+0.6*sm((S-1.75)/0.25)).toFixed(3));
     const gs = 0.6*(1-0.6*e); glows.forEach(g=>g.scale.set(gs,gs,gs));
     return q;
@@ -930,7 +955,7 @@ function whenVisible(el, fn){
         const tilt = (1-p);
         board.rotation.x += ((-ndc.y*0.08*tilt) - board.rotation.x)*0.06;
         board.rotation.z += ((-ndc.x*0.08*tilt) - board.rotation.z)*0.06;
-        heroText.style.opacity = Math.max(0, 1-p*2.6); hero.style.setProperty('--hg', Math.max(0, 1-p*2.6)); heroText.style.transform = `translateY(${-p*80}px)`;
+        heroText.style.opacity = Math.max(0, 1-p*2.6); heroText.classList.toggle('gone', p > .36); hero.style.setProperty('--hg', Math.max(0, 1-p*2.6)); heroText.style.transform = `translateY(${-p*80}px)`;
         fade.style.opacity = Math.max(0, (p-0.78)/0.22);
       }
       for(let i=0;i<NP;i++){
@@ -1378,11 +1403,11 @@ end koluvu steps */
   const mq = matchMedia('(min-width:1000px)'), NS = 'http://www.w3.org/2000/svg';
   const mk = (t,a,par)=>{ const e = document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); if(par) par.appendChild(e); return e; };
   const svg = mk('svg',{class:'sig','aria-hidden':'true'}); document.body.appendChild(svg);
-  const defs = mk('defs',{},svg), gT = mk('linearGradient',{id:'sigT',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:0,y2:1},defs), gL = mk('linearGradient',{id:'sigL',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:0,y2:1},defs);
-  const trk = mk('path',{class:'trk',stroke:'url(#sigT)'},svg), halo = mk('path',{class:'halo',stroke:'url(#sigL)'},svg), core = mk('path',{class:'core',stroke:'url(#sigL)'},svg);
-  const tapG = mk('g',{},svg), glow = mk('circle',{r:9,class:'glow'},svg), head = mk('circle',{r:3.5,class:'head'},svg);
+  const defs = mk('defs',{},svg), gT = mk('linearGradient',{id:'sigT',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:0,y2:1},defs), gL = mk('linearGradient',{id:'sigL',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:0,y2:1},defs), gD = mk('linearGradient',{id:'sigD',gradientUnits:'userSpaceOnUse',x1:0,y1:0,x2:0,y2:1},defs);
+  const trk = mk('path',{class:'trk',stroke:'url(#sigT)'},svg), done = mk('path',{class:'trk',stroke:'url(#sigD)'},svg), halo = mk('path',{class:'halo',stroke:'url(#sigL)'},svg), core = mk('path',{class:'core',stroke:'url(#sigL)'},svg);
+  const edgeG = mk('g',{},svg), tapG = mk('g',{},svg), glow = mk('circle',{r:12,class:'glow'},svg), head = mk('circle',{r:4.5,class:'head'},svg);
   const pinsEl = $('.pins'), pinEls = [...document.querySelectorAll('.pin')];
-  let G = null, raf = 0;
+  let G = null, raf = 0; const TR = 240;
   const pos = el=>{ let x = 0, y = 0, e = el; while(e){ x += e.offsetLeft; y += e.offsetTop; e = e.offsetParent; } return {x, y, w:el.offsetWidth, h:el.offsetHeight}; };
   function build(){
     const on = mq.matches; document.documentElement.classList.toggle('sigon', on); if(!on){ G = null; return; }
@@ -1392,33 +1417,36 @@ end koluvu steps */
     const term = pos($('#term')), path = pos($('#path')), bar = pos($('.chipbar'));
     const jx = path.x+19.5, jt = path.y+6, jb = path.y+path.h-6, y0 = term.y-30, yEnd = bar.y+bar.h/2;
     const d = `M${gx},${y0} V${jt-30} H${jx-15} L${jx},${jt-15} V${jb+15} L${jx-15},${jb+30} H${gx} V${yEnd} H${bar.x}`;
-    [trk,halo,core].forEach(e=>e.setAttribute('d', d));
+    [trk,done,halo,core].forEach(e=>e.setAttribute('d', d));
     /* colour per section: gold on dark sections, rust on light ones; hidden where the journey's own trace carries the signal */
     const secs = [['.boot','d'],['#work','l'],['#journey','d'],['#notes','l'],['#about','l'],['#contact','d']].map(([q,t])=>{ const r = pos($(q)); return [r.y, r.y+r.h, t]; });
-    const colT = {d:'rgba(212,168,75,.28)', l:'rgba(181,83,42,.24)'}, colL = {d:'#f0cf7a', l:'#b5532a'};
+    const colT = {d:'rgba(212,168,75,.18)', l:'rgba(173,100,71,.16)'};
     const stops = [];
-    secs.forEach(([a,b,t])=>{ stops.push([a,t],[b,t]); });
-    [gT,gL].forEach((g,gi)=>{ g.setAttribute('y2', Hd); g.innerHTML = '';
+    secs.forEach(([a,b,t])=>{ stops.push([a,t,0],[b,t,1]); });
+    const colD = {d:'rgba(217,180,86,.38)', l:'rgba(120,80,55,.32)'};
+    [[gT,colT],[gD,colD]].forEach(([g,col])=>{ g.setAttribute('y2', Hd); g.innerHTML = '';
       const add = (y,c)=>mk('stop',{offset:Math.max(0,Math.min(1,y/Hd)),'stop-color':c},g);
-      stops.forEach(([y,t])=>{
-        if(y > jt-14 && y < jb+14) return;
-        add(y, gi ? colL[t] : colT[t]);
-      });
-      // journey span: transparent
-      const jc = gi ? colL.d : colT.d; add(jt-14, jc); add(jt-14, 'rgba(0,0,0,0)'); add(jb+14, 'rgba(0,0,0,0)'); add(jb+14, jc);
-      [...g.children].sort((a,b)=>a.getAttribute('offset')-b.getAttribute('offset')).forEach(c=>g.appendChild(c));
-    });
+      stops.forEach(([y,t])=>{ if(y > jt-14 && y < jb+14) return; add(y, col[t]); });
+      add(jt-14, col.d); add(jt-14, 'rgba(0,0,0,0)'); add(jb+14, 'rgba(0,0,0,0)'); add(jb+14, col.d);
+      [...g.children].sort((a,b)=>a.getAttribute('offset')-b.getAttribute('offset')).forEach(c=>g.appendChild(c)); });
+    /* the travelling signal: a short trail, copper at the tail, gold at the head */
+    gL.innerHTML = ''; [[0,'#ad6447',0],[.4,'#c88a45',.85],[.8,'#e7b45a',1],[1,'#ffe39a',1]].forEach(([o,c,a])=>mk('stop',{offset:o,'stop-color':c,'stop-opacity':a},gL));
     const L = core.getTotalLength(), samp = [];
     for(let l=0;l<=L;l+=6){ const pt = core.getPointAtLength(l); samp.push([pt.y,l]); } samp.push([core.getPointAtLength(L).y, L]);
-    [halo,core].forEach(e=>{ e.style.strokeDasharray = L; });
+    [halo,core].forEach(e=>{ e.style.strokeDasharray = `${TR} ${L+TR}`; }); done.style.strokeDasharray = L;
     /* taps: a short branch to each heading the signal passes */
     tapG.innerHTML = '';
     const theme = y=>{ for(const [a,b,t] of secs) if(y>=a && y<b) return t; return 'd'; };
     const targets = ['.boot .term', '#work .sec-head .eyebrow', '#sense', '#think', '#build', '#journey .sec-head .eyebrow', '#notes .sec-head .eyebrow', '#about .eyebrow'];
     const taps = targets.map(q=>{ const el = $(q); if(!el) return null; const r = pos(el), y = q==='.boot .term' ? r.y+34 : r.y+r.h/2, x1 = r.x-8, len = Math.max(0, x1-gx);
       const g = mk('g',{class:'tap '+theme(y)},tapG), st = mk('path',{class:'stub',d:`M${gx},${y} H${x1}`},g); st.style.strokeDasharray = len; st.style.strokeDashoffset = len;
-      mk('circle',{class:'via',cx:gx,cy:y,r:3.5},g); return {y, g, st, len}; }).filter(Boolean);
-    G = {gx, y0, yEnd, L, samp, taps, theme, jt, jb};
+      mk('circle',{class:'via',cx:gx,cy:y,r:3.5},g); return {y, g, st, len, el, hot:false}; }).filter(Boolean);
+    const secEls = ['.boot','#work','#journey','#notes','#about','#contact'].map(q=>$(q));
+    const boxes = [...document.querySelectorAll('#work .proj .demo, #notes .post, #about .bp, #about .like')].filter(e=>e.offsetParent).map(el=>({el, was:false}));
+    /* where the page changes colour: a line of light runs across that edge when the signal crosses it */
+    edgeG.innerHTML = '';
+    const edges = secs.slice(1).map(([a])=>{ const len = W-gx, e = mk('path',{class:'edge',d:`M${gx},${a} H${W}`},edgeG); e.style.strokeDasharray = len; e.style.strokeDashoffset = len; return {y:a, e, len, was:false}; });
+    G = {gx, y0, yEnd, L, samp, taps, theme, jt, jb, secs, secEls, boxes, edges, cur: G ? G.cur : -1};
     update();
   }
   function lenAt(y){ const s = G.samp; if(y <= s[0][0]) return 0; let lo = 0, hi = s.length-1; while(hi-lo>1){ const m = (lo+hi)>>1; if(s[m][0] < y) lo = m; else hi = m; }
@@ -1430,11 +1458,17 @@ end koluvu steps */
     const t = Math.min(1, Math.max(0, (scrollY-(sMax-vh))/vh)), f = 0.6 + (fEnd-0.6)*t*t*(3-2*t);
     const hy = scrollY + f*vh;
     let l = hy <= G.y0 ? 0 : lenAt(hy); if(hy >= G.yEnd - 1) l = G.L;
-    halo.style.strokeDashoffset = core.style.strokeDashoffset = G.L - l;
+    halo.style.strokeDashoffset = core.style.strokeDashoffset = TR - l; done.style.strokeDashoffset = G.L - l;
     const pt = core.getPointAtLength(l), th = G.theme(pt.y), vis = l > 0 && l < G.L && !(pt.y > G.jt-14 && pt.y < G.jb+14);
     head.setAttribute('cx', pt.x); head.setAttribute('cy', pt.y); glow.setAttribute('cx', pt.x); glow.setAttribute('cy', pt.y);
-    head.setAttribute('class','head '+th); glow.setAttribute('class','glow '+th); head.style.opacity = glow.style.opacity = vis ? 1 : 0;
-    G.taps.forEach(tp=>{ const on = l > 0 && pt.y >= tp.y - 0.5; tp.g.classList.toggle('on', on); tp.st.style.strokeDashoffset = on ? 0 : tp.len; });
+    head.setAttribute('class','head '+th); glow.setAttribute('class','glow '+th); head.style.opacity = glow.style.opacity = vis ? 1 : 0; core.style.opacity = halo.style.opacity = vis ? '' : 0;
+    gL.setAttribute('y1', pt.y - TR); gL.setAttribute('y2', pt.y);
+    G.taps.forEach(tp=>{ const on = l > 0 && pt.y >= tp.y - 0.5; tp.g.classList.toggle('on', on); const hot = on && pt.y - tp.y < 160; tp.g.classList.toggle('hot', hot); const ty = tp.el ? tp.el.getBoundingClientRect().top + scrollY + tp.el.offsetHeight/2 : tp.y, near = l > 0 && pt.y >= ty - 60; if(near && !tp.lit && G.ready && tp.el){ const nx = tp.el.nextElementSibling; [tp.el, nx && nx.tagName === 'H2' ? nx : null].forEach(e=>{ if(!e) return; e.classList.remove('sig-lit'); void e.offsetWidth; e.classList.add('sig-lit'); }); } tp.hot = hot; tp.was = on; tp.lit = near; tp.st.style.strokeDashoffset = on ? 0 : tp.len; });
+    G.boxes.forEach(bx=>{ const r = bx.el.getBoundingClientRect(), top = r.top + scrollY - 60, above = l <= 0 || pt.y < top;
+      if(bx.armed === undefined) bx.armed = above;
+      if(above){ bx.armed = true; } else if(bx.armed && pt.y < r.bottom + scrollY && G.ready){ const el = bx.el; el.classList.remove('sig-box'); void el.offsetWidth; el.classList.add('sig-box'); bx.armed = false; } else if(!above) bx.armed = false; });
+    G.edges.forEach(ed=>{ const on = l > 0 && pt.y >= ed.y; if(on && !ed.was && G.ready && !matchMedia('(prefers-reduced-motion: reduce)').matches){ if(ed.a) ed.a.cancel(); ed.a = ed.e.animate([{strokeDashoffset:ed.len, opacity:1},{strokeDashoffset:0, opacity:1, offset:.55},{strokeDashoffset:0, opacity:0}], {duration:1600, easing:'ease-out'}); } ed.was = on; });
+    G.ready = true;
     const arrived = l >= G.L - 0.5; pinsEl.classList.toggle('live', arrived);
     pinEls.forEach((el,i)=>{ el.style.transitionDelay = arrived ? (i*0.12)+'s' : '0s'; el.querySelector('.leg').style.transitionDelay = arrived ? (i*0.12)+'s' : '0s'; el.classList.toggle('sig-on', arrived); });
   }
@@ -1484,7 +1518,7 @@ end koluvu steps */
 (function(){
   const P = {
     depth:{meta:'IISc Bangalore · Sep to Nov 2023',title:'Monocular depth estimation',lead:'Recovering depth from a single camera image, the kind of perception that lets a cheap sensor understand distance. A group project of four at IISc, supervised by Prof. Venkatesh Babu.',stats:[['85.81%','test accuracy, Keras metric'],['4','encoders compared'],['25,000','training images'],['327','test images']],secs:[['What we built',['Compared four U-Net encoders on NYU Depth V2: DenseNet-121, DenseNet-169, DenseNet-201 and ResNeXt-50','Final model: a DenseNet-201 U-Net with a custom SSIM + edge + cosine loss, trained for 10 epochs on 25,000 images','Also applied to NASA HiRISE Mars imagery']],['The result',['Test accuracy 85.81%: the Keras accuracy metric on our 327-image NYU Depth V2 test split']],['What happened next',['At SJSU I took depth estimation onto an FPGA in a separate project, FastDepth on a Zynq-7000. It is under Hardware on this page.']]],stack:['U-Net','DenseNet-201','NYU Depth V2','Keras','Computer vision']},
-    fpga:{meta:'SJSU · EE 295 · 2026',title:'Fixed-point depth on a Zynq FPGA',lead:'How much precision does an on-device depth network need, and what should run on the ARM cores versus the FPGA fabric? I answered both for FastDepth on a Zybo Z7-10.',stats:[['4.02 ms','FPGA layer, incl. DMA'],['11.7×','faster than ARM NEON'],['0','mismatches, bit-exact'],['63 / 80','DSP slices at 100 MHz']],secs:[['On the FPGA',['FastDepth (MobileNet encoder, NYU Depth v2) on a Digilent Zybo Z7-10 (Zynq-7000)','First convolution layer as a streaming, line-buffered INT8 kernel in Vitis HLS, with AXI DMA in a Vivado block design','4.02 ms on the board including DMA: 11.7× faster than ARM NEON INT8 and 38.8× faster than scalar FP32','Bit-exact: 0 of 401,408 outputs differ from the ARM INT8 golden model; 29.1 dB SQNR against FP32','Timing met at 100 MHz using 63 of 80 DSPs. INT16 at the same parallelism would need 108 DSPs, which is why INT8 went to the board']],['The precision study',['FP32, INT16, INT8 and mixed precision compared on NYU Depth v2 (654 test images)','INT16 matched FP32 exactly; INT8 cost some accuracy (RMSE 0.604 to 0.723 m)','Judged by a stopping-distance brake model too: mixed precision beat INT8 on RMSE yet missed more brake decisions (39 vs 29), so precision should be chosen against the task, not just the benchmark']],['Next',['Extend from layer 1 to the full encoder, partitioned between ARM and FPGA by measured latency and task impact','Choose per-layer precision by brake-decision sensitivity instead of RMSE']]],stack:['FastDepth','PyTorch','Vitis HLS','Vivado','AXI DMA','Zynq-7000','INT8 / INT16'],link:['Code, reports and board results on GitHub','https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint']},
+    fpga:{meta:'SJSU · EE 295 · 2026',title:'Fixed-point depth on a Zynq FPGA',lead:'How much precision does an on-device depth network need, and what should run on the ARM cores versus the FPGA fabric? For FastDepth on a Zybo Z7-10, I evaluated the precision tradeoffs and accelerated the first convolution layer.',stats:[['4.02 ms','FPGA layer, incl. DMA'],['11.7×','faster than ARM NEON'],['0','mismatches, bit-exact'],['63 / 80','DSP slices at 100 MHz']],secs:[['On the FPGA',['FastDepth (MobileNet encoder, NYU Depth v2) on a Digilent Zybo Z7-10 (Zynq-7000)','First convolution layer as a streaming, line-buffered INT8 kernel in Vitis HLS, with AXI DMA in a Vivado block design','4.02 ms on the board including DMA: 11.7× faster than ARM NEON INT8 and 38.8× faster than scalar FP32','Bit-exact: 0 of 401,408 outputs differ from the ARM INT8 golden model; 29.1 dB SQNR against FP32','Timing met at 100 MHz using 63 of 80 DSPs. INT16 at the same parallelism would need 108 DSPs, which is why INT8 went to the board']],['The precision study',['FP32, INT16, INT8 and mixed precision compared on NYU Depth v2 (654 test images)','INT16 matched FP32 exactly; INT8 cost some accuracy (RMSE 0.604 to 0.723 m)','Judged by a stopping-distance brake model too: mixed precision beat INT8 on RMSE yet missed more brake decisions (39 vs 29), so precision should be chosen against the task, not just the benchmark']],['Next',['Extend from layer 1 to the full encoder, partitioned between ARM and FPGA by measured latency and task impact','Choose per-layer precision by brake-decision sensitivity instead of RMSE']]],stack:['FastDepth','PyTorch','Vitis HLS','Vivado','AXI DMA','Zynq-7000','INT8 / INT16'],link:['Code, reports and board results on GitHub','https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint']},
     detect:{meta:'Published paper · JETIR',title:'Real-Time Object Detection and Recognition with Voice Feedback for the Blind',lead:'Published in JETIR (Journal of Emerging Technologies and Innovative Research): a system that detects and recognises objects in real time and speaks them aloud, to help blind users understand what is around them.',secs:[['Why it matters',['On a car, a robot or a camera, a detection that arrives late is a detection that missed','The confidence threshold is where you trade false alarms against missed objects, which is what the demo lets you feel']]],stack:['Object detection','Computer vision','Real-time systems']},
     hyper:{meta:'MTech thesis · Jain University · Gold Medalist',title:'Hyperspectral image reconstruction',lead:'Reconstructing images across many narrow spectral bands, far beyond the red, green and blue a normal camera sees.',secs:[['Why it matters',['Hyperspectral data reveals material properties invisible to the eye, with uses from agriculture to medical imaging','Reconstructing it computationally makes that information cheaper to capture']],['Recognition',['Gold Medalist in an AICTE-funded MTech in Data Science']]],stack:['Spectral imaging','Deep learning','Reconstruction']},
     caprus:{meta:'CaprusIT · AI & ML Developer · Mar 2023 to May 2026 · Hyderabad',title:'Production AI at CaprusIT',lead:'I designed and deployed production AI across mental wellness, AI-driven media and aviation, and mentored the interns and freshers who joined us.',secs:[['Menthra · AI mental wellness',['LLM-based therapy chat with RAG personalisation','NLP modules for emotion analysis and intent detection','Talking avatars via HeyGen, text-to-speech via ElevenLabs, speech-to-text via Whisper','Deployed on Azure']],['Aauti · AI avatar marketplace',['The avatar video generation pipeline, using computer vision and HeyGen','Voice cloning R&D with Wav2Lip lip-sync','A modular microservice architecture']],['EmpowerMX · aviation maintenance (MRO)',['ML pipelines using BERT embeddings for maintenance records','Clustering, classification and recommendation models','Production inference on AWS SageMaker, ECS, S3 and EventBridge']],['Mentoring',['Trained interns and freshers on ML pipelines, backend systems and production workflows']]],stack:['Python','PyTorch','TensorFlow','FastAPI','LangChain','Azure','AWS','Docker']},
