@@ -4,6 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sindhura Kuchibhotla · Digital Design, FPGAs and Edge AI</title>
+<meta name="description" content="MSEE student at San José State building AI that runs on real hardware: digital design, FPGAs and edge AI. Looking for Summer 2027 internships.">
+<link rel="canonical" href="https://sindhurakuchibhotla.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sindhura Kuchibhotla">
+<meta property="og:title" content="Sindhura Kuchibhotla · Digital Design, FPGAs and Edge AI">
+<meta property="og:description" content="MSEE student at San José State building AI that runs on real hardware: digital design, FPGAs and edge AI. Looking for Summer 2027 internships.">
+<meta property="og:url" content="https://sindhurakuchibhotla.github.io/">
+<meta property="og:image" content="https://sindhurakuchibhotla.github.io/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A circuit board with a chip marked SK, beside the headline: I build AI that runs on real hardware.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sindhura Kuchibhotla · Digital Design, FPGAs and Edge AI">
+<meta name="twitter:description" content="MSEE student at San José State building AI that runs on real hardware: digital design, FPGAs and edge AI.">
+<meta name="twitter:image" content="https://sindhurakuchibhotla.github.io/og.jpg">
+<meta name="theme-color" content="#0e2f26">
+<link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -294,6 +312,18 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
   .reader{padding:34px 24px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none}}
+/* measured latency bars (FPGA project) */
+.bars{display:flex;flex-direction:column;gap:6px;padding:10px 4px 4px}
+.bars .row{display:grid;grid-template-columns:168px 1fr 72px;align-items:center;gap:12px;width:100%;padding:5px 0;background:none;border:0;text-align:left;font-family:var(--mono);font-size:12px;color:#b9af9c;cursor:pointer}
+.bars .row i{display:block;justify-self:start;height:16px;width:0;min-width:5px;border-radius:3px;background:#5b7c8d;transition:width 1.1s cubic-bezier(.2,.7,.2,1)}
+.bars .row b{font-weight:500;text-align:right;color:#e9dfcb}
+.bars .row:hover,.bars .row:focus-visible,.bars .row.sel{color:#fff;outline:none}
+.bars .row:hover i,.bars .row.sel i{filter:brightness(1.25)}
+.bars .row.pl{color:var(--gold2)}
+.bars .row.pl i{background:linear-gradient(90deg,#f0cf7a,#d4a84b);box-shadow:0 0 12px rgba(240,207,122,.55)}
+.bars .row.pl b{color:var(--gold2)}
+.barnote{font-family:var(--serif);font-size:17px;line-height:1.4;color:var(--cream);min-height:72px;padding:12px 14px;margin-top:8px;border-left:2px solid var(--gold);background:rgba(212,168,75,.06);border-radius:0 8px 8px 0}
+@media(max-width:600px){.bars .row{grid-template-columns:1fr 64px;gap:4px 10px}.bars .row span{grid-column:1/-1}.barnote{font-size:16px}}
 /* demo badge moves under the label on phones (set from the script) */
 .illu.tl{top:52px;left:24px;right:auto}
 .reader .stats b.long{font-size:21px;line-height:28px;white-space:nowrap}
@@ -371,9 +401,9 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
 
   <div class="proj rv">
     <div class="txt">
-      <div class="tag">IISc Bangalore · thesis</div>
+      <div class="tag">IISc Bangalore · group of four · 2023</div>
       <h3>Monocular depth estimation</h3>
-      <p>Seeing depth from a single camera, the way a car or robot has to when there's no second lens or LiDAR to lean on. My U-Net with a DenseNet-201 encoder reached 85.81% test accuracy, above the 85% published benchmark. At SJSU I took depth onto silicon: an INT8 FastDepth kernel on a Zynq-7000 FPGA, 11.7× faster than ARM NEON and bit-exact.</p>
+      <p>Seeing depth from a single camera, the way a car or robot has to when there's no second lens or LiDAR to lean on. At IISc, our group of four compared four U-Net encoders on NYU Depth V2 and chose a DenseNet-201 U-Net with a custom SSIM, edge and cosine loss. Test accuracy: 85.81% (Keras accuracy metric).</p>
       <p>Drag the line across the street to switch between what the camera sees and the depth a model would estimate.</p>
       <div class="chips"><span>U-Net</span><span>DenseNet-201</span><span>depth</span><span>computer vision</span></div>
       <button class="rm" data-rm="depth">Read more &rarr;</button>
@@ -434,6 +464,22 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
 
   <div class="proj rv">
     <div class="txt">
+      <div class="tag">SJSU · EE 295 · 2026</div>
+      <h3>Fixed-point depth on a Zynq FPGA</h3>
+      <p>How much precision does an on-device depth network need, and what should run on the ARM cores versus the FPGA fabric? I answered both for FastDepth on a Zybo Z7-10. The first convolution layer, built as an INT8 kernel in Vitis HLS, runs in 4.02 ms on the board: 11.7× faster than ARM NEON, and bit-exact.</p>
+      <p>These are the times measured on the board. Hover or tap a bar to compare.</p>
+      <div class="chips"><span>Vitis HLS</span><span>Vivado</span><span>AXI DMA</span><span>Zynq-7000</span><span>INT8 · INT16</span></div>
+      <button class="rm" data-rm="fpga">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel" style="position:static;display:inline-block;margin-bottom:4px">measured on the board</div>
+      <div class="bars" id="fpgaBars"></div>
+      <div class="barnote" id="fpgaNote"></div>
+      <div class="dbar"><span>Zybo Z7-10 · FastDepth layer 1 · 224×224 input · mean of 10 runs</span></div>
+    </div>
+  </div>
+
+  <div class="proj flip rv">
+    <div class="txt">
       <div class="tag">Embedded World NA · Edge AI Hackathon · Sep 2026</div>
       <h3>Machine-vision waste sorter</h3>
       <p>Two days, one Arduino Uno Q, a conveyor belt and a problem revealed on the morning of: sort waste into compost, recycling or trash and show the call on an OLED.</p>
@@ -445,7 +491,7 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
     <div class="demo"><div class="dlabel">conveyor cam</div><div class="illu">illustration</div><canvas id="dWaste" width="720" height="440"></canvas></div>
   </div>
 
-  <div class="proj flip rv">
+  <div class="proj rv">
     <div class="txt">
       <div class="tag">SJSU EE 271 · team of four · in progress</div>
       <h3>Pipelined fixed-point CORDIC engine</h3>
@@ -459,7 +505,7 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
       <table class="ctable" id="ctab"></table></div>
   </div>
 
-  <div class="proj rv">
+  <div class="proj flip rv">
     <div class="txt">
       <div class="tag">GVPCE · BTech · team lead · 2018 to 2019</div>
       <h3>Cardy Heart</h3>
@@ -472,7 +518,7 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
   </div>
 
   <!-- Bommala Koluvu: hidden for now. Remove this comment wrapper to show it again.
-  <div class="proj flip rv">
+  <div class="proj rv">
     <div class="txt">
       <div class="tag">Next build · January 2027</div>
       <h3>An interactive Bommala Koluvu</h3>
@@ -938,6 +984,25 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
   $('#ragGo').onclick = ()=>ask(inp.value); inp.addEventListener('keydown', e=>{ if(e.key==='Enter') ask(inp.value); });
 })();
 
+/* FPGA project: latency measured on the Zybo Z7-10 (numbers from board/sw/board_report.txt in the project repository) */
+(function(){
+  const el = $('#fpgaBars'), note = $('#fpgaNote'); if(!el || !note) return;
+  const rows = [['ARM A9 · FP32, scalar',155.9,'Scalar FP32 on the Cortex-A9'],['ARM A9 · INT8, scalar',86.2,'Scalar INT8 on the Cortex-A9'],['ARM NEON · FP32',77.2,'NEON FP32 on the Cortex-A9'],['ARM NEON · INT8',47.2,'NEON INT8 on the Cortex-A9'],['FPGA · INT8 kernel',4.02,'']];
+  const base = 'The FPGA kernel takes 4.02 ms, including DMA in and out, and matches the ARM INT8 model bit for bit.';
+  const max = rows[0][1];
+  rows.forEach((r,k)=>{
+    const d = document.createElement('button'); d.type = 'button'; d.className = 'row' + (k===4 ? ' pl' : '');
+    d.innerHTML = `<span>${r[0]}</span><i data-w="${(r[1]/max*100).toFixed(2)}"></i><b>${r[1]} ms</b>`;
+    const say = ()=>{ note.textContent = k===4 ? base : `${r[2]}: ${r[1]} ms. The FPGA kernel is ${(r[1]/4.02).toFixed(1)}× faster.`; };
+    d.addEventListener('pointerenter', say); d.addEventListener('focus', say);
+    d.addEventListener('click', ()=>{ say(); el.querySelectorAll('.row').forEach(x=>x.classList.remove('sel')); d.classList.add('sel'); });
+    el.appendChild(d);
+  });
+  el.addEventListener('pointerleave', ()=>{ if(!el.querySelector('.row.sel')) note.textContent = base; });
+  note.textContent = base;
+  new IntersectionObserver((es,io)=>{ if(es[0].isIntersecting){ el.querySelectorAll('i').forEach((b,k)=>setTimeout(()=>{ b.style.width = b.dataset.w + '%'; }, reduce ? 0 : k*120)); io.disconnect(); } },{threshold:.35}).observe(el);
+})();
+
 /* waste sorter */
 (function(){
   const c = $('#dWaste'), x = c.getContext('2d'), W = c.width, H = c.height;
@@ -1119,7 +1184,8 @@ end koluvu steps */
 /* project read-more pages */
 (function(){
   const P = {
-    depth:{meta:'IISc Bangalore · 2023, then SJSU · 2026',title:'Monocular depth estimation',lead:'Recovering depth from a single camera image, the kind of perception that lets a cheap sensor understand distance. I started on the model side at IISc and took it all the way onto an FPGA at SJSU.',stats:[['85.81%','IISc test accuracy'],['4.02 ms','FPGA layer, incl. DMA'],['11.7×','faster than ARM NEON'],['0','mismatches, bit-exact']],secs:[['At IISc · the model',['A U-Net with a DenseNet-201 encoder for single-image depth estimation','85.81% test accuracy, above the 85% published benchmark']],['At SJSU · onto the FPGA',['FastDepth (MobileNet encoder, NYU Depth v2) on a Digilent Zybo Z7-10 (Zynq-7000)','First convolution layer as a streaming, line-buffered INT8 kernel in Vitis HLS, with AXI DMA in a Vivado block design','4.02 ms on the board including DMA: 11.7× faster than ARM NEON INT8 and 38.8× faster than scalar FP32','Bit-exact: 0 of 401,408 outputs differ from the ARM INT8 golden model; 29.1 dB SQNR against FP32','Timing met at 100 MHz using 63 of 80 DSPs. INT16 at the same parallelism would need 108 DSPs, which is why INT8 went to the board']],['The precision study',['FP32, INT16, INT8 and mixed precision compared on NYU Depth v2 (654 test images)','INT16 matched FP32 exactly; INT8 cost some accuracy (RMSE 0.604 to 0.723 m)','Judged by a stopping-distance brake model too: mixed precision beat INT8 on RMSE yet missed more brake decisions (39 vs 29), so precision should be chosen against the task, not just the benchmark']]],stack:['U-Net','DenseNet-201','FastDepth','PyTorch','Vitis HLS','Vivado','AXI DMA','Zynq-7000','INT8 / INT16'],link:['Code, reports and board results on GitHub','https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint']},
+    depth:{meta:'IISc Bangalore · Sep to Nov 2023',title:'Monocular depth estimation',lead:'Recovering depth from a single camera image, the kind of perception that lets a cheap sensor understand distance. A group project of four at IISc, supervised by Prof. Venkatesh Babu.',stats:[['85.81%','test accuracy, Keras metric'],['4','encoders compared'],['25,000','training images'],['327','test images']],secs:[['What we built',['Compared four U-Net encoders on NYU Depth V2: DenseNet-121, DenseNet-169, DenseNet-201 and ResNeXt-50','Final model: a DenseNet-201 U-Net with a custom SSIM + edge + cosine loss, trained for 10 epochs on 25,000 images','Also applied to NASA HiRISE Mars imagery']],['The result',['Test accuracy 85.81%: the Keras accuracy metric on our 327-image NYU Depth V2 test split']],['What happened next',['At SJSU I took depth estimation onto an FPGA in a separate project, FastDepth on a Zynq-7000. It is under Hardware on this page.']]],stack:['U-Net','DenseNet-201','NYU Depth V2','Keras','Computer vision']},
+    fpga:{meta:'SJSU · EE 295 · 2026',title:'Fixed-point depth on a Zynq FPGA',lead:'How much precision does an on-device depth network need, and what should run on the ARM cores versus the FPGA fabric? I answered both for FastDepth on a Zybo Z7-10.',stats:[['4.02 ms','FPGA layer, incl. DMA'],['11.7×','faster than ARM NEON'],['0','mismatches, bit-exact'],['63 / 80','DSP slices at 100 MHz']],secs:[['On the FPGA',['FastDepth (MobileNet encoder, NYU Depth v2) on a Digilent Zybo Z7-10 (Zynq-7000)','First convolution layer as a streaming, line-buffered INT8 kernel in Vitis HLS, with AXI DMA in a Vivado block design','4.02 ms on the board including DMA: 11.7× faster than ARM NEON INT8 and 38.8× faster than scalar FP32','Bit-exact: 0 of 401,408 outputs differ from the ARM INT8 golden model; 29.1 dB SQNR against FP32','Timing met at 100 MHz using 63 of 80 DSPs. INT16 at the same parallelism would need 108 DSPs, which is why INT8 went to the board']],['The precision study',['FP32, INT16, INT8 and mixed precision compared on NYU Depth v2 (654 test images)','INT16 matched FP32 exactly; INT8 cost some accuracy (RMSE 0.604 to 0.723 m)','Judged by a stopping-distance brake model too: mixed precision beat INT8 on RMSE yet missed more brake decisions (39 vs 29), so precision should be chosen against the task, not just the benchmark']],['Next',['Extend from layer 1 to the full encoder, partitioned between ARM and FPGA by measured latency and task impact','Choose per-layer precision by brake-decision sensitivity instead of RMSE']]],stack:['FastDepth','PyTorch','Vitis HLS','Vivado','AXI DMA','Zynq-7000','INT8 / INT16'],link:['Code, reports and board results on GitHub','https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint']},
     detect:{meta:'Published paper',title:'Real-time object detection',lead:'Research on detecting objects fast enough to act on, where latency matters as much as accuracy.',secs:[['Why it matters',['On a car, a robot or a camera, a detection that arrives late is a detection that missed','The confidence threshold is where you trade false alarms against missed objects, which is what the demo lets you feel']]],stack:['Object detection','Computer vision','Real-time systems']},
     hyper:{meta:'MTech thesis · Jain University · Gold Medalist',title:'Hyperspectral image reconstruction',lead:'Reconstructing images across many narrow spectral bands, far beyond the red, green and blue a normal camera sees.',secs:[['Why it matters',['Hyperspectral data reveals material properties invisible to the eye, with uses from agriculture to medical imaging','Reconstructing it computationally makes that information cheaper to capture']],['Recognition',['Gold Medalist in an AICTE-funded MTech in Data Science']]],stack:['Spectral imaging','Deep learning','Reconstruction']},
     caprus:{meta:'CaprusIT · AI & ML Developer · Mar 2023 to May 2026 · Hyderabad',title:'Production AI at CaprusIT',lead:'I designed and deployed production AI across mental wellness, AI-driven media and aviation, and mentored the interns and freshers who joined us.',secs:[['Menthra · AI mental wellness',['LLM-based therapy chat with RAG personalisation','NLP modules for emotion analysis and intent detection','Talking avatars via HeyGen, text-to-speech via ElevenLabs, speech-to-text via Whisper','Deployed on Azure']],['Aauti · AI avatar marketplace',['The avatar video generation pipeline, using computer vision and HeyGen','Voice cloning R&D with Wav2Lip lip-sync','A modular microservice architecture']],['EmpowerMX · aviation maintenance (MRO)',['ML pipelines using BERT embeddings for maintenance records','Clustering, classification and recommendation models','Production inference on AWS SageMaker, ECS, S3 and EventBridge']],['Mentoring',['Trained interns and freshers on ML pipelines, backend systems and production workflows']]],stack:['Python','PyTorch','TensorFlow','FastAPI','LangChain','Azure','AWS','Docker']},
