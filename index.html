@@ -563,6 +563,19 @@ html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,12
 
   <div class="proj flip rv">
     <div class="txt">
+      <div class="tag">SJSU EE 277 · team of four · I lead · in progress</div>
+      <h3>Hindsight Lamp</h3>
+      <p>An overhead lamp with a camera that remembers where things were left. When something is put down or moved, the FPGA notices the change and the ARM core records what it was, where and when. Press the item's key and a pan-tilt spotlight lights it up, while the HDMI screen shows when it was last seen. It never records video, only a short log of changes.</p>
+      <p>My piece: I'm leading the team and own the change detector (reference frame in BRAM, event FIFO and interrupt to the ARM), the item map on the ARM, and the Vivado block design and integration.</p>
+      <div class="chips"><span>SystemVerilog</span><span>Zynq-7000</span><span>Pcam 5C</span><span>BRAM</span><span>AXI</span><span>interrupts</span></div>
+      <button class="rm" data-rm="hind">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">what the lamp sees</div><div class="illu">illustration</div><canvas id="dHind" width="720" height="380"></canvas>
+      <div class="dbar" id="hindBar"><span>find:</span></div></div>
+  </div>
+
+  <div class="proj rv">
+    <div class="txt">
       <div class="tag">GVPCE · BTech · team lead · 2018 to 2019</div>
       <h3>Cardy Heart</h3>
       <p>A solar-powered biomedical wearable: ECG, pulse and accelerometer sensors read through an SPI ADC on a Raspberry Pi, with an OLED display, alerts and an Android app. I led the team of four and wrote the acquisition firmware, alerts and app communication.</p>
@@ -574,7 +587,7 @@ html.sigon .pins.live + .chipbar{color:var(--gold2);border-color:rgba(240,207,12
   </div>
 
   <!-- Bommala Koluvu: hidden for now. Remove this comment wrapper to show it again.
-  <div class="proj rv">
+  <div class="proj flip rv">
     <div class="txt">
       <div class="tag">Next build · January 2027</div>
       <h3>An interactive Bommala Koluvu</h3>
@@ -1113,6 +1126,7 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
     ["FPGA and RTL","In digital design I write SystemVerilog RTL and build for FPGA with Vivado and Vitis HLS. On a Zybo Z7-10 (Zynq-7000) FPGA I built an INT8 FastDepth convolution kernel that runs 11.7x faster than ARM NEON, and I wrote the parameterized barrel shifter for our team's pipelined CORDIC engine in SystemVerilog."],
     ["Hardware","Hardware I've built: a waste-sorting vision system on Arduino Uno Q, the Cardy Heart wearable on a Raspberry Pi, a barrel shifter for our team's SystemVerilog CORDIC engine, and an INT8 FastDepth convolution kernel on a Zynq-7000 FPGA that runs 11.7x faster than ARM NEON. Next: custom PCBs."],
     ["CORDIC","In EE 271 at SJSU our team of four is building a parameterized, pipelined fixed-point CORDIC engine in SystemVerilog for motor control. My piece is the parameterized barrel shifter."],
+    ["Hindsight","In EE 277 at SJSU I'm leading a team of four building Hindsight Lamp: an overhead camera lamp on a Zynq-7000 FPGA that remembers where things were left and points a spotlight at an item on request. I own the change detector, the item map and the system integration."],
     ["Cardy Heart","Cardy Heart was my BTech team project: a solar-powered biomedical wearable that read ECG, pulse and motion sensors on a Raspberry Pi and sent alerts to an Android app. I led the team of four."],
     ["Leadership","I led a team of four to runner-up at the Embedded World North America Edge AI Hackathon, led the Cardy Heart team, coordinated 100+ NSS volunteers in college, and mentored interns and freshers at CaprusIT."],
     ["Awards","Awards: Gold Medalist in my MTech in Data Science at Jain University, and runner-up in the Sustainability track of the 2026 Embedded World North America Edge AI Hackathon."],
@@ -1261,6 +1275,56 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
     let html = '<tr><th>i</th><th>dir</th><th>x</th><th>y</th><th>angle left</th></tr>';
     steps.forEach((r,k)=>{ if(k===0) return; html += `<tr class="${k===cur?'on':''}"><td>${r.i}</td><td>${r.d}</td><td>${r.x.toFixed(4)}</td><td>${r.y.toFixed(4)}</td><td>${(r.z*180/Math.PI).toFixed(2)}°</td></tr>`; });
     if(tab._last !== cur+'|'+ang.value){ tab.innerHTML = html; tab._last = cur+'|'+ang.value; }
+  });
+})();
+
+/* Hindsight lamp */
+(function(){
+  const c = $('#dHind'), x = c.getContext('2d'), W = c.width, H = c.height, bar = $('#hindBar');
+  const DX = 20, DY = 20, DW = 470, DH = 340, COLS = 12, ROWS = 8, cw = DW/COLS, chh = DH/ROWS;
+  const items = [{n:'keys',col:'#c4552b',w:2,h:1,cx:2,cy:2},{n:'wallet',col:'#5b5fc7',w:2,h:2,cx:8,cy:5},{n:'glasses',col:'#1f8a63',w:3,h:1,cx:6,cy:1}];
+  items.forEach(it=>{ it.x = DX+it.cx*cw; it.y = DY+it.cy*chh; it.seen = 540; });
+  const log = []; let m = null, nt = 2, last = -1, fi = -1, fu = 0, now = 0, changes = [];
+  const hhmm = v=>String(Math.floor(v/60)%24).padStart(2,'0')+':'+String(Math.floor(v%60)).padStart(2,'0');
+  items.forEach((it,i)=>{ const b = document.createElement('button'); b.textContent = it.n; b.style.borderColor = it.col; b.onclick = ()=>{ fi = i; fu = now+3.2; }; bar.appendChild(b); });
+  const overlaps = (a,cx,cy)=>items.some(o=>o!==a && cx < o.cx+o.w+1 && cx+a.w+1 > o.cx && cy < o.cy+o.h+1 && cy+a.h+1 > o.cy);
+  const rr = (X,Y,w,h,r)=>{ x.beginPath(); x.moveTo(X+r,Y); x.arcTo(X+w,Y,X+w,Y+h,r); x.arcTo(X+w,Y+h,X,Y+h,r); x.arcTo(X,Y+h,X,Y,r); x.arcTo(X,Y,X+w,Y,r); x.closePath(); };
+  whenVisible(c, t=>{
+    now = t; const sm = phoneMQ.matches, clock = 540 + t*2;
+    if(!m && t > nt){
+      let i; do{ i = Math.floor(Math.random()*items.length); } while(i === last); last = i; const it = items[i];
+      let cx, cy, k = 0; do{ cx = Math.floor(Math.random()*(COLS-it.w)); cy = Math.floor(Math.random()*(ROWS-it.h)); k++; } while(k < 60 && ((cy === 0 && cx < 5) || overlaps(it,cx,cy) || (Math.abs(cx-it.cx)+Math.abs(cy-it.cy) < 3)));
+      if(k < 60) m = {i, sx:it.x, sy:it.y, ocx:it.cx, ocy:it.cy, cx, cy, s:t}; else nt = t+1;
+    }
+    if(m){ const it = items[m.i], q = Math.min(1,(t-m.s)/0.9), e = q<.5 ? 2*q*q : 1-Math.pow(-2*q+2,2)/2;
+      it.x = m.sx + (DX+m.cx*cw - m.sx)*e; it.y = m.sy + (DY+m.cy*chh - m.sy)*e;
+      if(q >= 1){ changes.push({r:[[m.ocx,m.ocy,it.w,it.h],[m.cx,m.cy,it.w,it.h]], until:t+1.4}); it.cx = m.cx; it.cy = m.cy; it.seen = clock; log.unshift([hhmm(clock), it.n, it.col]); log.length = Math.min(log.length, 7); m = null; nt = t + 2.6 + Math.random()*1.6; } }
+    x.fillStyle = '#0b100d'; x.fillRect(0,0,W,H);
+    rr(DX-6,DY-6,DW+12,DH+12,10); x.fillStyle = '#1a231e'; x.fill(); x.strokeStyle = 'rgba(212,168,75,.45)'; x.lineWidth = 1.5; x.stroke();
+    x.strokeStyle = 'rgba(212,168,75,.07)'; x.lineWidth = 1;
+    for(let i=1;i<COLS;i++){ x.beginPath(); x.moveTo(DX+i*cw,DY); x.lineTo(DX+i*cw,DY+DH); x.stroke(); }
+    for(let j=1;j<ROWS;j++){ x.beginPath(); x.moveTo(DX,DY+j*chh); x.lineTo(DX+DW,DY+j*chh); x.stroke(); }
+    changes = changes.filter(ch=>ch.until > t);
+    changes.forEach(ch=>{ const a = Math.min(1,(ch.until-t)/0.6)*(0.6+0.4*Math.sin(t*14)); ch.r.forEach(([cx,cy,w,h])=>{ x.fillStyle = `rgba(240,207,122,${0.16*a})`; x.fillRect(DX+cx*cw, DY+cy*chh, w*cw, h*chh); x.strokeStyle = `rgba(240,207,122,${a})`; x.lineWidth = sm ? 3 : 2; x.strokeRect(DX+cx*cw+1, DY+cy*chh+1, w*cw-2, h*chh-2); }); });
+    items.forEach((it,i)=>{ const lift = m && m.i === i ? 6 : 0, w = it.w*cw, h = it.h*chh;
+      rr(it.x+5+lift, it.y+5+lift, w-6, h-6, 6); x.fillStyle = 'rgba(0,0,0,.35)'; x.fill();
+      rr(it.x+3, it.y+3-lift, w-6, h-6, 6); x.fillStyle = '#e9dfcb'; x.fill(); x.strokeStyle = it.col; x.lineWidth = sm ? 4 : 3; x.stroke();
+      x.fillStyle = it.col; x.beginPath(); x.arc(it.x+14, it.y+14-lift, sm ? 7 : 5, 0, 7); x.fill();
+      x.fillStyle = '#1f1a15'; x.font = `600 ${sm?19:14}px JetBrains Mono`; x.textAlign = 'center'; x.fillText(it.n, it.x+w/2, it.y+h/2+(sm?7:5)-lift); });
+    if(fi >= 0 && t < fu){ const it = items[fi], w = it.w*cw, h = it.h*chh, ix = it.x+w/2, iy = it.y+h/2, R = Math.max(w,h)*0.75, a = Math.min(1,(fu-t)/0.5, (t-(fu-3.2))/0.3);
+      x.save(); x.globalAlpha = a; x.beginPath(); x.rect(DX-6,DY-6,DW+12,DH+12); x.arc(ix,iy,R,0,Math.PI*2,true); x.fillStyle = 'rgba(5,8,6,.62)'; x.fill('evenodd');
+      const lx = DX+DW/2, ly = 6; x.beginPath(); x.moveTo(lx-6,ly); x.lineTo(ix-R*0.9,iy); x.lineTo(ix+R*0.9,iy); x.lineTo(lx+6,ly); x.closePath(); x.fillStyle = 'rgba(240,207,122,.12)'; x.fill();
+      const g = x.createRadialGradient(ix,iy,0,ix,iy,R); g.addColorStop(0,'rgba(255,236,170,.32)'); g.addColorStop(1,'rgba(255,236,170,0)'); x.fillStyle = g; x.beginPath(); x.arc(ix,iy,R,0,7); x.fill();
+      x.fillStyle = '#f0cf7a'; x.beginPath(); x.arc(lx,ly+4,sm?9:6,0,7); x.fill();
+      x.font = `500 ${sm?22:13}px JetBrains Mono`; x.textAlign = 'center'; const ty = iy+R+(sm?26:18) < DY+DH ? iy+R+(sm?26:18) : iy-R-(sm?12:8);
+      x.fillText('last seen '+hhmm(it.seen), Math.min(DX+DW-80, Math.max(DX+80, ix)), ty); x.restore(); }
+    const px = DX+DW+22, pw = W-px-14; x.textAlign = 'left';
+    x.fillStyle = '#d4a84b'; x.font = `500 ${sm?20:12}px JetBrains Mono`; const T0 = sm ? 130 : 84; x.fillText(sm ? 'MOVED' : 'EVENT LOG', px, T0);
+    if(!sm){ x.fillStyle = '#7d766a'; x.font = '400 12px JetBrains Mono'; x.fillText(hhmm(clock), px+pw-38, T0); }
+    log.slice(0, sm ? 5 : 7).forEach(([tm,n,col],k)=>{ const y = T0+(sm?44:34)+k*(sm?42:36); x.globalAlpha = Math.max(.35, 1-k*.12);
+      x.fillStyle = col; x.fillRect(px, y-(sm?14:9), sm?6:4, sm?18:12); x.fillStyle = '#e9dfcb'; x.font = `400 ${sm?20:13}px JetBrains Mono`;
+      x.fillText(sm ? `${tm} ${n}` : `${tm}  ${n} moved`, px+(sm?14:10), y); x.globalAlpha = 1; });
+    if(!log.length){ x.fillStyle = '#6d7d72'; x.font = `400 ${sm?20:12}px JetBrains Mono`; x.fillText('waiting…', px, T0+(sm?44:34)); }
   });
 })();
 
@@ -1426,6 +1490,7 @@ end koluvu steps */
     caprus:{meta:'CaprusIT · AI & ML Developer · Mar 2023 to May 2026 · Hyderabad',title:'Production AI at CaprusIT',lead:'I designed and deployed production AI across mental wellness, AI-driven media and aviation, and mentored the interns and freshers who joined us.',secs:[['Menthra · AI mental wellness',['LLM-based therapy chat with RAG personalisation','NLP modules for emotion analysis and intent detection','Talking avatars via HeyGen, text-to-speech via ElevenLabs, speech-to-text via Whisper','Deployed on Azure']],['Aauti · AI avatar marketplace',['The avatar video generation pipeline, using computer vision and HeyGen','Voice cloning R&D with Wav2Lip lip-sync','A modular microservice architecture']],['EmpowerMX · aviation maintenance (MRO)',['ML pipelines using BERT embeddings for maintenance records','Clustering, classification and recommendation models','Production inference on AWS SageMaker, ECS, S3 and EventBridge']],['Mentoring',['Trained interns and freshers on ML pipelines, backend systems and production workflows']]],stack:['Python','PyTorch','TensorFlow','FastAPI','LangChain','Azure','AWS','Docker']},
     waste:{meta:'Embedded World North America · Anaheim · Sep 2026',title:'Machine-vision waste sorter',lead:'I led a team of four to runner-up in the ASUS-sponsored Sustainability Challenge: a vision system that sorts waste on a conveyor, built in two days.',stats:[['Runner-up','Sustainability track'],['12','teams at the event'],['83.3%','test accuracy'],['7','material classes']],secs:[['What we built',['A MobileNetV3-Small classifier deployed through ONNX Runtime on the Qualcomm QRB2210-based Arduino UNO Q','Seven material classes, routed to compost, recycling or trash','Trained on RealWaste and TrashNet, mixed with our own validation data','Linux-side Python inference integrated with the STM32U585 firmware','An OLED display driver ported to the board\'s Zephyr-based core, so every decision shows on screen']],['The constraint',['The conveyor was too small for real trash and had a DC motor but no servo, so nothing could push an item into a bin','We could have overfit to the few demo pieces on the table. We built for real waste instead, which cost us first place: the winner trained on about 200 images of the demo items']],['Next',['Continuing it as a side project: real waste and an actuator that actually sorts']]],stack:['MobileNetV3','ONNX Runtime','Arduino UNO Q','App Lab','STM32U585','Zephyr','Python']},
     cordic:{meta:'SJSU EE 271 · team of four · Sep 2026 to now',title:'Pipelined fixed-point CORDIC engine',lead:'A parameterized, pipelined CORDIC engine in SystemVerilog for field-oriented motor control. It turns stationary-frame components and rotor angle into motor-aligned d/q components using only shifts and adds.',secs:[['My piece',['The parameterized barrel shifter that performs every 2⁻ⁱ shift']],['The project',['Configurable word width and pipeline depth','Synthesis of several configurations to compare accuracy, latency, clock frequency and resource use','Verification with a self-checking testbench against a software reference model']],['Why it matters',['Motor controllers run these transforms continuously. CORDIC does trigonometry without multipliers: give up a little precision, win area, power and clock speed']]],stack:['SystemVerilog','Fixed-point','Pipelining','Verification']},
+    hind:{meta:'SJSU EE 277 · team of four · Nov 2026 to now',title:'Hindsight Lamp',lead:'An overhead lamp with a camera that remembers where things were left. When something is put down or moved, the FPGA notices the change and the ARM core records what it was, where and when. Press the item\'s key and a pan-tilt spotlight lights it up, while the HDMI screen shows when it was last seen. It never records video, only a short log of changes.',secs:[['My piece',['Leading the team of four','The change detector: reference frame in BRAM, an event FIFO and an interrupt to the ARM','The item map on the ARM, plus the Vivado block design and system integration']],['The build plan',['Stage 1: camera and color-tag tracking','Stage 2: change detection and the item map','Stage 3: spotlight aiming and low power','Stage 4: DC motors with PID control and a voice trigger']],['What we will measure',['Frame rate and power, ARM-only versus FPGA detection','Detection latency','False events per hour','Spotlight aiming error']]],stack:['SystemVerilog','Zynq-7000','Zybo Z7-10','Pcam 5C','BRAM','AXI','Interrupts','Vivado'],note:'Demo on December 7. Measurements and code will follow.'},
     cardy:{meta:'GVP College of Engineering · BTech · Dec 2018 to Apr 2019',title:'Cardy Heart',lead:'A solar-powered biomedical wearable that tracks heart signals, pulse and motion, and alerts a phone when something looks wrong.',secs:[['What we built',['Integrated AD8232 ECG, pulse-rate and ADXL335 accelerometer sensors','Read them through an MCP3008 SPI ADC, with a 0.96-inch I²C OLED display','Ran it all on a solar-powered Raspberry Pi']],['My part',['Led the team of four','Wrote the acquisition firmware, the alerts and the Android communication']],['Next',['Taking it from prototype wiring to a custom PCB']]],stack:['Raspberry Pi','AD8232 ECG','ADXL335','MCP3008','SPI','I²C','Android']}
   };
   /* missed-brake sweep, from eval/results/threshold_sweep.csv in the fastdepth-zynq-fixedpoint repo (654 NYU Depth v2 test images) */
