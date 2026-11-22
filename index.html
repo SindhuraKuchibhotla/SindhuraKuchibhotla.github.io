@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sindhura Kuchibhotla · Digital Design, FPGAs and Edge AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=Manrope:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pcb:#0e2f26; --pcb2:#143e32; --die:#111613; --gold:#d4a84b; --gold2:#f0cf7a;
+  --cream:#f5eddd; --paper:#efe4cf; --ink:#1f1a15; --mute:#6f665b; --rust:#b5532a; --mustard:#d89b2b; --deep:#8e2b22; --bottle:#1f5a45;
+  --serif:"Fraunces",Georgia,serif; --sans:"Manrope",-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--ink);background:var(--die);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+img,canvas{display:block}
+.mono{font-family:var(--mono)}
+::selection{background:var(--mustard);color:var(--ink)}
+
+/* nav */
+.nav{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:4px;padding:6px;border-radius:999px;background:rgba(17,22,19,.72);border:1px solid rgba(212,168,75,.25);backdrop-filter:blur(12px)}
+.nav a{white-space:nowrap;font-size:13px;color:#e9dfcb;text-decoration:none;padding:7px 13px;border-radius:999px;transition:background .2s,color .2s}
+.nav a:hover{background:rgba(212,168,75,.15);color:var(--gold2)}
+.nav .me{font-family:var(--serif);font-style:italic;color:var(--gold2);padding-right:16px}
+.nav .open{background:var(--gold);color:var(--ink);font-weight:600}
+.nav .open:hover{background:var(--gold2);color:var(--ink)}
+@media(max-width:760px){.nav a:not(.me):not(.open){display:none}}
+
+/* hero */
+.hero{height:230vh;position:relative;background:var(--pcb)}
+.stick{position:sticky;top:0;height:100vh;overflow:hidden}
+#board{position:absolute;inset:0;width:100%;height:100%}
+.hero-text{position:absolute;left:7vw;bottom:14vh;max-width:640px;color:var(--cream);pointer-events:none}
+.hero-text .k{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);margin-bottom:18px;display:flex;gap:10px;align-items:center}
+.hero-text .k i{width:8px;height:8px;border-radius:50%;background:#7bd389;box-shadow:0 0 10px #7bd389}
+.hero-text h1{font-family:var(--serif);font-weight:300;font-size:clamp(46px,7vw,104px);line-height:.98;letter-spacing:-.02em}
+.hero-text h1 em{font-style:italic;color:var(--gold2)}
+.hero-text p{margin-top:22px;font-size:18px;color:#d9cfbb;max-width:44ch}
+.hero-text .who{margin-top:26px;font-family:var(--mono);font-size:12px;color:#bfb49f;letter-spacing:.06em}
+.cue{position:absolute;right:6vw;bottom:8vh;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;writing-mode:vertical-rl}
+.stick:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,47,38,.85) 0%,rgba(14,47,38,.4) 38%,transparent 60%);pointer-events:none;opacity:var(--hg,1)}
+.hero-text{z-index:2}.fade{z-index:3}
+.fade{position:absolute;inset:0;background:var(--die);opacity:0;pointer-events:none}
+
+/* die / floorplan */
+.die{background:var(--die);color:var(--cream);padding:6vh 6vw 14vh}
+.die-head{max-width:900px;margin:0 auto 40px;text-align:center}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.die-head h2{font-family:var(--serif);font-weight:300;font-size:clamp(34px,4.6vw,60px);line-height:1.05;margin-top:12px}
+.die-head h2 em{color:var(--gold2)}
+.die-head p{color:#a9a08f;margin-top:12px}
+.floor{max-width:1000px;margin:0 auto;aspect-ratio:16/10;border:2px solid var(--gold);border-radius:10px;padding:14px;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(4,1fr);gap:10px;position:relative;background:
+  repeating-linear-gradient(0deg,rgba(212,168,75,.05) 0 1px,transparent 1px 22px),repeating-linear-gradient(90deg,rgba(212,168,75,.05) 0 1px,transparent 1px 22px)}
+.floor:before{content:"";position:absolute;inset:-12px;border:1px dashed rgba(212,168,75,.25);border-radius:14px;pointer-events:none}
+.blk{border:1px solid rgba(212,168,75,.45);border-radius:6px;padding:14px;text-decoration:none;color:var(--cream);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;transition:background .25s,border-color .25s,transform .25s;background:rgba(20,62,50,.35)}
+.blk:hover{background:rgba(212,168,75,.14);border-color:var(--gold2);transform:translateY(-2px)}
+.blk .id{font-family:var(--mono);font-size:10.5px;color:var(--gold);letter-spacing:.1em}
+.blk b{font-family:var(--serif);font-weight:400;font-size:clamp(18px,2.2vw,28px);line-height:1.1}
+.blk span{font-size:12.5px;color:#b9af9c}
+.blk:after{content:"";position:absolute;left:-40%;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(240,207,122,.18),transparent);transform:skewX(-20deg);transition:left .7s}
+.blk:hover:after{left:120%}
+.b1{grid-column:1/3;grid-row:1/3}.b2{grid-column:3/5;grid-row:1/2}.b3{grid-column:5/7;grid-row:1/3}
+.b4{grid-column:3/5;grid-row:2/4}.b5{grid-column:1/3;grid-row:3/5}.b6{grid-column:5/7;grid-row:3/5}.b7{grid-column:3/5;grid-row:4/5}
+@media(max-width:760px){.floor{aspect-ratio:auto;grid-template-columns:1fr 1fr;grid-template-rows:none}.floor .blk{grid-column:auto!important;grid-row:auto!important;min-height:120px}}
+
+/* boot */
+.boot{background:var(--die);padding:0 6vw 12vh;color:#cfe8d6}
+.term{max-width:860px;margin:0 auto;border:1px solid rgba(123,211,137,.25);border-radius:12px;background:#0b100d;padding:22px 24px;font-family:var(--mono);font-size:13.5px;line-height:1.85;min-height:300px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.term .bar{display:flex;gap:6px;margin-bottom:14px}.term .bar i{width:10px;height:10px;border-radius:50%;background:#2c3a31}
+.term .ok{color:#7bd389}.term .g{color:var(--gold2)}.term .d{color:#6d7d72}
+.term .cur{display:inline-block;width:8px;height:15px;background:#7bd389;vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* work */
+.work{background:var(--cream);padding:14vh 6vw 10vh}
+.sec-head{max-width:1180px;margin:0 auto 60px;display:flex;justify-content:space-between;align-items:end;gap:30px;flex-wrap:wrap}
+.sec-head h2{font-family:var(--serif);font-weight:300;font-size:clamp(38px,5vw,68px);line-height:1;letter-spacing:-.015em}
+.sec-head h2 em{color:var(--rust)}
+.sec-head p{max-width:40ch;color:var(--mute)}
+.work .eyebrow{color:var(--rust)}
+.group{max-width:1180px;margin:0 auto 26px;display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--bottle)}
+.group:after{content:"";flex:1;height:1px;background:rgba(31,90,69,.25)}
+.proj{max-width:1180px;margin:0 auto 90px;display:grid;grid-template-columns:1fr 1.25fr;gap:48px;align-items:center}
+.proj.flip{grid-template-columns:1.25fr 1fr}.proj.flip .txt{order:2}
+.proj .tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--rust);text-transform:uppercase}
+.proj h3{font-family:var(--serif);font-weight:400;font-size:clamp(28px,3vw,40px);line-height:1.08;margin:10px 0 14px}
+.proj p{color:#4a4238;font-size:16px}
+.proj p+p{margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.chips span{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:999px;background:rgba(31,90,69,.08);color:var(--bottle);border:1px solid rgba(31,90,69,.18)}
+.badge{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 12px;border-radius:8px;background:var(--mustard);color:var(--ink);font-size:13px;font-weight:600}
+.demo{background:var(--die);border-radius:16px;padding:14px;box-shadow:0 30px 60px -20px rgba(31,26,21,.45);position:relative;color:var(--cream)}
+.demo canvas{width:100%;height:auto;border-radius:10px;background:#0b100d;touch-action:none}
+.dbar{display:flex;align-items:center;gap:12px;margin-top:12px;font-family:var(--mono);font-size:11.5px;color:#b9af9c;flex-wrap:wrap}
+.dbar label{display:flex;align-items:center;gap:8px;flex:1;min-width:180px}
+.dbar input[type=range]{flex:1;accent-color:var(--gold)}
+.dbar button{font-family:var(--mono);font-size:11.5px;background:transparent;color:var(--gold2);border:1px solid rgba(212,168,75,.5);border-radius:7px;padding:5px 10px;cursor:pointer}
+.dbar button:hover{background:rgba(212,168,75,.15)}
+.dlabel{position:absolute;top:24px;left:24px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold2);background:rgba(11,16,13,.75);padding:4px 8px;border-radius:5px;pointer-events:none}
+.illu{position:absolute;top:24px;right:24px;font-family:var(--mono);font-size:10px;color:#8f8676;background:rgba(11,16,13,.75);padding:4px 8px;border-radius:5px;pointer-events:none}
+.ctable{width:100%;margin-top:10px;font-family:var(--mono);font-size:11px;border-collapse:collapse;color:#cfc5b0}
+.ctable td,.ctable th{padding:3px 6px;text-align:right;border-top:1px solid rgba(212,168,75,.12)}
+.ctable th{color:var(--gold);font-weight:400}
+.ctable tr.on td{color:var(--gold2);background:rgba(212,168,75,.08)}
+.rag{display:flex;flex-direction:column;gap:10px}
+.ragq{display:flex;gap:8px}
+.ragq input{flex:1;font-family:var(--sans);font-size:14px;padding:10px 12px;border-radius:9px;border:1px solid rgba(212,168,75,.35);background:#0b100d;color:var(--cream);outline:none}
+.ragq input:focus{border-color:var(--gold2)}
+.ragq button{font-family:var(--mono);font-size:12px;background:var(--gold);color:var(--ink);border:0;border-radius:9px;padding:0 14px;cursor:pointer;font-weight:500}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font-size:12px;font-family:var(--sans);background:rgba(212,168,75,.08);color:#e2d6bd;border:1px solid rgba(212,168,75,.25);border-radius:999px;padding:5px 10px;cursor:pointer}
+.presets button:hover{border-color:var(--gold2)}
+.hits{display:flex;flex-direction:column;gap:6px;min-height:150px}
+.hit{font-size:12.5px;color:#b9af9c;padding:8px 10px;border-radius:8px;background:#0b100d;border:1px solid rgba(255,255,255,.05);position:relative;overflow:hidden;opacity:.45;transition:opacity .4s,border-color .4s}
+.hit.top{opacity:1;border-color:rgba(212,168,75,.45);color:#e9dfcb}
+.hit i{position:absolute;left:0;bottom:0;height:2px;background:var(--gold);transition:width .6s}
+.hit em{font-family:var(--mono);font-style:normal;color:var(--gold);font-size:10.5px;margin-right:6px}
+.answer{font-family:var(--serif);font-size:18px;line-height:1.4;color:var(--cream);min-height:56px;padding:12px 14px;border-left:2px solid var(--gold);background:rgba(212,168,75,.06);border-radius:0 8px 8px 0}
+
+/* journey */
+.journey{background:var(--pcb);color:var(--cream);padding:14vh 6vw;position:relative}
+.journey .sec-head h2 em{color:var(--gold2)}
+.journey .sec-head p{color:#a9b9ad}
+.path{max-width:900px;margin:0 auto;position:relative;padding-left:56px}
+.trace{position:absolute;left:18px;top:6px;bottom:6px;width:3px;background:rgba(212,168,75,.18);border-radius:3px}
+.trace i{position:absolute;left:0;top:0;width:100%;background:linear-gradient(var(--gold2),var(--gold));border-radius:3px;height:0;box-shadow:0 0 12px var(--gold)}
+.stop{position:relative;padding:0 0 44px}
+.stop:before{content:"";position:absolute;left:-46px;top:6px;width:15px;height:15px;border-radius:50%;border:2px solid var(--gold);background:var(--pcb);transition:background .4s,box-shadow .4s}
+.stop.lit:before{background:var(--gold2);box-shadow:0 0 14px var(--gold)}
+.stop .when{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.stop h4{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.15;margin:4px 0 6px}
+.stop p{color:#c3d0c6;font-size:15px;max-width:60ch}
+
+/* notes */
+.notes{background:var(--paper);padding:14vh 6vw}
+.notes .eyebrow{color:var(--rust)}
+.posts{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.post{background:var(--cream);border-radius:14px;padding:26px;border:1px solid rgba(31,26,21,.08);cursor:pointer;transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column;gap:10px;text-align:left;font:inherit;color:inherit}
+.post:hover{transform:translateY(-4px);box-shadow:0 20px 40px -20px rgba(31,26,21,.35)}
+.post .meta{font-family:var(--mono);font-size:11px;color:var(--rust);letter-spacing:.08em;text-transform:uppercase}
+.post h3{font-family:var(--serif);font-weight:400;font-size:24px;line-height:1.15}
+.post p{color:var(--mute);font-size:14.5px}
+.post .more{font-family:var(--mono);font-size:11.5px;color:var(--bottle);margin-top:auto}
+.post.soon{cursor:default;border-style:dashed;background:transparent}
+.post.soon:hover{transform:none;box-shadow:none}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(17,22,19,.6);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:6vh 4vw;overflow:auto}
+.modal.on{display:flex}
+.reader{background:var(--cream);max-width:680px;width:100%;border-radius:16px;padding:44px 48px;position:relative}
+.reader .meta{font-family:var(--mono);font-size:11px;color:var(--rust);letter-spacing:.08em;text-transform:uppercase}
+.reader h2{font-family:var(--serif);font-weight:400;font-size:clamp(30px,4vw,42px);line-height:1.08;margin:10px 0 22px}
+.reader p{font-family:var(--serif);font-size:19px;line-height:1.6;color:#2e2720;margin-bottom:16px}
+.reader .x{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(31,26,21,.15);background:transparent;cursor:pointer;font-size:18px}
+
+/* about */
+.about{background:var(--cream);padding:14vh 6vw;position:relative;overflow:hidden}
+.about .eyebrow{color:var(--rust)}
+.about-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.1fr 1fr;gap:60px;align-items:start}
+.about h2{font-family:var(--serif);font-weight:300;font-size:clamp(36px,4.4vw,58px);line-height:1.05;margin:12px 0 22px}
+.about h2 em{color:var(--rust)}
+.about p{font-size:17px;color:#40382f}
+.about p+p{margin-top:14px}
+.likes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.like{border-radius:14px;padding:20px;min-height:140px;display:flex;flex-direction:column;justify-content:space-between;color:var(--cream);position:relative;overflow:hidden}
+.like b{font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.1}
+.like span{font-size:13.5px;opacity:.85}
+.like .ic{font-size:30px}
+.l1{background:var(--bottle)}.l2{background:var(--rust)}.l3{background:var(--deep)}.l4{background:var(--mustard);color:var(--ink)}
+.l5{background:var(--pcb);grid-column:1/-1;min-height:auto}
+#plane{position:absolute;left:0;top:0;width:34px;height:34px;pointer-events:none;z-index:3;transition:opacity .4s;opacity:0}
+.trail{position:absolute;inset:0;pointer-events:none;z-index:2}
+
+/* read more + about tweaks */
+.rm{margin-top:18px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;background:transparent;color:var(--rust);border:1px solid rgba(181,83,42,.45);border-radius:999px;padding:8px 14px;cursor:pointer;transition:background .2s,color .2s}
+.rm:hover{background:var(--rust);color:var(--cream)}
+.reader h4{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--rust);font-weight:500;margin:26px 0 10px}
+.reader ul{list-style:none;margin:0 0 6px}
+.reader li{position:relative;padding-left:20px;margin-bottom:9px;font-size:16.5px;line-height:1.55;color:#2e2720}
+.reader li:before{content:"";position:absolute;left:2px;top:10px;width:7px;height:7px;border-radius:2px;background:var(--mustard)}
+.reader .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:1px;background:rgba(31,26,21,.12);border:1px solid rgba(31,26,21,.12);border-radius:12px;overflow:hidden;margin:6px 0 10px}
+.reader .stats div{background:var(--paper);padding:14px}
+.reader .stats b{display:block;font-family:var(--serif);font-weight:400;font-size:28px;line-height:1;color:var(--rust)}
+.reader .stats span{font-size:12px;color:var(--mute)}
+.reader .rchips{display:flex;flex-wrap:wrap;gap:6px}
+.reader .rchips span{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:999px;background:rgba(31,90,69,.08);color:var(--bottle);border:1px solid rgba(31,90,69,.18)}
+.bp{grid-column:1/-1;display:grid;grid-template-columns:1fr 120px;border-radius:14px;overflow:hidden;background:#fbf7f1;box-shadow:0 14px 30px -18px rgba(31,26,21,.45);transform:rotate(-1.2deg)}
+.bp .main{padding:18px 22px}
+.bp small{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--rust)}
+.bp .route{font-family:var(--serif);font-size:36px;line-height:1.1;margin:4px 0 6px;color:var(--ink)}
+.bp .seat{font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.06em}
+.bp p{font-size:14px;color:#4a4238;margin-top:10px}
+.bp .stub{background:var(--bottle);border-left:2px dashed var(--cream);display:flex;align-items:center;justify-content:center}
+.hello{background:#f0cf7a;color:var(--ink);border-radius:4px;padding:18px 20px;transform:rotate(1.6deg);box-shadow:0 14px 26px -16px rgba(31,26,21,.5);display:flex;flex-direction:column;justify-content:center;gap:2px}
+.hello b{font-family:var(--serif);font-weight:400;font-size:24px;line-height:1.25}
+.hello b:first-child{font-style:italic}
+.hello span{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;margin-top:8px;opacity:.75}
+.recipe{background:#fbf7f1;border-radius:6px;padding:18px 20px 16px;box-shadow:0 14px 26px -16px rgba(31,26,21,.45);background-image:repeating-linear-gradient(#fbf7f1 0 25px,rgba(181,83,42,.18) 25px 26px);background-position:0 46px;border-top:6px solid var(--rust);transform:rotate(-1deg)}
+.recipe small{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--rust)}
+.recipe b{display:block;font-family:var(--serif);font-style:italic;font-weight:400;font-size:22px;line-height:1.1;margin:4px 0 8px;color:var(--ink)}
+.recipe ul{list-style:none;font-size:13.5px;color:#4a4238;line-height:26px}
+.recipe ul li:before{content:"▢ ";color:var(--rust)}
+.recipe{position:relative;min-height:230px;padding-right:110px!important;overflow:hidden}
+.recipe svg{position:absolute;pointer-events:none}
+.t-cup{top:20px;right:18px;width:54px;transform:rotate(8deg)}
+.t-spoon{top:62px;right:76px;width:16px;transform:rotate(30deg)}
+.t-pin{top:132px;left:112px;width:70px;transform:rotate(-12deg)}
+.t-bowl{bottom:22px;right:10px;width:96px}
+.whisk{animation:mix 1.6s ease-in-out infinite;transform-box:view-box;transform-origin:65px 20px}
+.recipe:hover .whisk{animation-duration:.6s}
+@keyframes mix{0%{transform:translate(-5px,0) rotate(-6deg)}50%{transform:translate(5px,2px) rotate(6deg)}100%{transform:translate(-5px,0) rotate(-6deg)}}
+.space{grid-column:1/-1;position:relative;overflow:hidden;border-radius:14px;padding:20px 22px;color:#ECE8FF;background:radial-gradient(120% 140% at 85% 10%,#3a2f6b 0%,#141a33 45%,#0a0e1c 100%);box-shadow:0 14px 30px -18px rgba(31,26,21,.55);min-height:150px}
+.space small{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:#f0cf7a}
+.space b{display:block;font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.1;margin:6px 0 6px}
+.space p{font-size:14px;color:rgba(236,232,255,.78);max-width:34ch;position:relative;z-index:1}
+.space svg{position:absolute;right:0;top:0;height:100%;width:62%}
+.space .tw{animation:tw 2.8s ease-in-out infinite}
+.space .tw:nth-of-type(3n){animation-delay:.9s}.space .tw:nth-of-type(3n+1){animation-delay:1.8s}
+@keyframes tw{0%,100%{opacity:.35}50%{opacity:1}}
+.space .orbit{animation:spin 18s linear infinite;transform-origin:270px 78px;transform-box:view-box}
+@keyframes spin{to{transform:rotate(360deg)}}
+.steam path{opacity:0;animation:steam 2.6s ease-in-out infinite}
+.steam path:nth-child(2){animation-delay:.85s}.steam path:nth-child(3){animation-delay:1.7s}
+@keyframes steam{0%{opacity:0;transform:translateY(6px)}40%{opacity:.85}100%{opacity:0;transform:translateY(-8px)}}
+.score{background:#10251c;border-radius:12px;padding:16px 18px;color:#f0cf7a;font-family:var(--mono);box-shadow:inset 0 0 0 2px #1f5a45,0 14px 26px -16px rgba(31,26,21,.5);position:relative;overflow:hidden}
+.score small{font-size:10px;letter-spacing:.16em;color:#7bd389}
+.score .board{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin:10px 0 8px;font-size:13px}
+.score .board span:nth-child(even){color:#7bd389;text-align:right}
+.score p{font-family:var(--sans);font-size:13px;color:#cfe8d6;line-height:1.45}
+.score .live{position:absolute;top:14px;right:16px;font-size:10px;color:#e86a50;letter-spacing:.12em;animation:blink 1.4s steps(1) infinite}
+.craft{background:#c9a77c;border-radius:6px;padding:22px 20px 16px;color:var(--ink);position:relative;box-shadow:0 14px 26px -16px rgba(31,26,21,.5);transform:rotate(1.2deg);background-image:radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px);background-size:6px 6px}
+.craft:before,.craft:after{content:"";position:absolute;top:-8px;width:64px;height:20px;background:rgba(216,155,43,.75);transform:rotate(-6deg)}
+.craft:before{left:14px}.craft:after{right:14px;transform:rotate(7deg);background:rgba(181,83,42,.6)}
+.craft b{display:block;font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.1;margin-bottom:6px}
+.craft p{font-size:13.5px;color:#3a2c22}
+.craft .ic{font-size:26px;margin-bottom:6px}
+
+
+/* boarding pass on a star chart */
+.bp{position:relative;background:radial-gradient(120% 160% at 80% 0%,#3a2f6b 0%,#141a33 50%,#0a0e1c 100%)!important;color:#ECE8FF}
+.bp .sky{position:absolute;inset:0;pointer-events:none}
+.bp .sky svg{position:absolute;right:120px;top:0;height:100%;width:62%}
+.bp .sky::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,18,38,.96) 0%,rgba(14,18,38,.82) 38%,rgba(14,18,38,0) 70%)}
+.bp .main{position:relative;z-index:1}
+.bp small{color:#f0cf7a!important}
+.bp .route{color:#F3EEFF!important}.bp .route span{font-size:22px;color:#f0cf7a}
+.bp .seat{color:rgba(236,232,255,.6)!important}
+.bp p{color:rgba(236,232,255,.8)!important;max-width:40ch}
+.bp .stub{position:relative;z-index:1;flex-direction:column;gap:8px;background:rgba(31,90,69,.85)!important}
+.bp .stub span{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:#f0cf7a}
+.bp .tw{animation:tw 2.8s ease-in-out infinite}.bp .tw:nth-of-type(3n){animation-delay:.9s}.bp .tw:nth-of-type(3n+1){animation-delay:1.8s}
+.bp .orbit{animation:spin 18s linear infinite;transform-origin:270px 78px;transform-box:view-box}
+/* recipe: shorter */
+.recipe{min-height:190px!important;padding-right:92px!important}
+.recipe b{font-size:20px!important;white-space:nowrap}
+.recipe ul{line-height:23px!important}
+.t-cup{width:44px!important;top:16px!important;right:14px!important}
+.t-spoon{top:56px!important;right:62px!important}
+.t-pin{top:112px!important;left:104px!important;width:62px!important}
+.t-bowl{width:84px!important;bottom:14px!important}
+@media(max-width:600px){.bp .sky svg{right:0;width:100%;opacity:.45}}
+
+
+/* pass layout: star chart banner on top, text below, stub on the right */
+.bp{grid-template-columns:1fr 96px!important;grid-template-rows:auto auto}
+.bp .sky{position:relative!important;inset:auto!important;grid-column:1;grid-row:1;padding:14px 18px 0}
+.bp .sky svg{position:static!important;display:block;width:100%!important;height:auto!important;max-height:150px;opacity:1!important}
+.bp .sky::after{display:none!important}
+.bp .main{grid-column:1;grid-row:2;padding-top:4px!important}
+.bp .stub{grid-column:2;grid-row:1/3}
+
+/* contact */
+.contact{background:var(--die);color:var(--cream);padding:14vh 6vw 8vh;text-align:center}
+.contact h2{font-family:var(--serif);font-weight:300;font-size:clamp(40px,6vw,84px);line-height:1;margin:14px 0 18px}
+.contact h2 em{color:var(--gold2)}
+.contact p{color:#a9a08f;max-width:52ch;margin:0 auto}
+.pins{margin:56px auto 0;max-width:900px;display:flex;justify-content:center;flex-wrap:wrap;gap:14px;position:relative}
+.pin{display:flex;flex-direction:column;align-items:center;gap:10px;text-decoration:none;color:var(--cream);width:150px}
+.pin .leg{width:14px;height:44px;background:linear-gradient(var(--gold2),var(--gold));border-radius:3px 3px 0 0;transition:height .3s,box-shadow .3s}
+.pin:hover .leg{height:60px;box-shadow:0 0 18px var(--gold)}
+.pin b{font-weight:500;font-size:15px}
+.pin span{font-family:var(--mono);font-size:10.5px;color:#8f8676;letter-spacing:.08em;text-transform:uppercase}
+.pin.todo{opacity:.5}
+.chipbar{max-width:780px;margin:0 auto;height:46px;border-radius:8px;background:#1a201c;border:1px solid rgba(212,168,75,.35);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--gold)}
+footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11px;text-align:center;padding:40px 6vw 50px;letter-spacing:.05em}
+
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s}
+.rv.in{opacity:1;transform:none}
+@media(max-width:900px){
+  .proj,.proj.flip{grid-template-columns:1fr;gap:24px}.proj.flip .txt{order:0}
+  .about-grid{grid-template-columns:1fr}
+  .reader{padding:34px 24px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Main">
+  <a class="me" href="#top">Sindhura K.</a>
+  <a href="#work">Work</a>
+  <a href="#journey">Journey</a>
+  <a href="#notes">Notes</a>
+  <a href="#about">About</a>
+  <a class="open" href="#contact">Summer 2027 · let's talk</a>
+</nav>
+
+<section class="hero" id="top">
+  <div class="stick">
+    <canvas id="board" aria-hidden="true"></canvas>
+    <div class="hero-text" id="heroText">
+      <div class="k"><i></i>MSEE · San José State University</div>
+      <h1>I build AI that runs on <em>real hardware.</em></h1>
+      <p>Three years shipping production AI. Now going down the stack: digital design, RTL, FPGAs and silicon.</p>
+      <div class="who">Sindhura (Ananta) Kuchibhotla · Digital Design · FPGA · Edge AI · Perception</div>
+    </div>
+    <div class="cue">Scroll into the chip ↓</div>
+    <div class="fade" id="fade"></div>
+  </div>
+</section>
+
+<section class="die" id="die">
+  <div class="die-head rv">
+    <div class="eyebrow">You are now inside the chip</div>
+    <h2>Every block is a part of <em>how I work.</em></h2>
+    <p>Pick a block, or keep scrolling to boot it up.</p>
+  </div>
+  <div class="floor rv">
+    <a class="blk b1" href="#sense"><div class="id">SENSE · 0x01</div><div><b>Perception</b><br><span>Depth, detection, hyperspectral imaging</span></div></a>
+    <a class="blk b2" href="#think"><div class="id">THINK · 0x02</div><div><b>Models</b><br><span>LLMs and RAG in production</span></div></a>
+    <a class="blk b3" href="#build"><div class="id">BUILD · 0x03</div><div><b>Hardware</b><br><span>Edge boards, RTL, wearables</span></div></a>
+    <a class="blk b4" href="#journey"><div class="id">PATH · 0x04</div><div><b>Journey</b><br><span>From EEE to edge AI</span></div></a>
+    <a class="blk b5" href="#about"><div class="id">LEAD · 0x05</div><div><b>People</b><br><span>Mentoring, teams, volunteering</span></div></a>
+    <a class="blk b6" href="#notes"><div class="id">WRITE · 0x06</div><div><b>Notes</b><br><span>What I'm learning</span></div></a>
+    <a class="blk b7" href="#contact"><div class="id">I/O · 0x07</div><div><b>Contact</b></div></a>
+  </div>
+</section>
+
+<section class="boot">
+  <div class="term" id="term"><div class="bar"><i></i><i></i><i></i></div><div id="termOut"></div></div>
+</section>
+
+<section class="work" id="work">
+  <div class="sec-head rv">
+    <div><div class="eyebrow">Selected work</div><h2>Things I've built, <em>running live.</em></h2></div>
+    <p>Each project comes with a small demo you can play with right here. They're simplified sketches of the idea, not the real models.</p>
+  </div>
+
+  <div class="group" id="sense">SENSE · perception</div>
+
+  <div class="proj rv">
+    <div class="txt">
+      <div class="tag">IISc Bangalore · thesis</div>
+      <h3>Monocular depth estimation</h3>
+      <p>Seeing depth from a single camera, the way a car or robot has to when there's no second lens or LiDAR to lean on. My U-Net with a DenseNet-201 encoder reached 85.81% test accuracy, above the 85% published benchmark, and I'm now quantizing it for an FPGA.</p>
+      <p>Drag the line across the street to switch between what the camera sees and the depth a model would estimate.</p>
+      <div class="chips"><span>U-Net</span><span>DenseNet-201</span><span>depth</span><span>computer vision</span></div>
+      <button class="rm" data-rm="depth">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">RGB ⟷ depth</div><div class="illu">illustration</div><canvas id="dDepth" width="720" height="440"></canvas>
+      <div class="dbar"><span>Drag on the image</span><span style="margin-left:auto">near <span style="color:#fcffa4">■</span> → far <span style="color:#57106e">■</span></span></div></div>
+  </div>
+
+  <div class="proj flip rv">
+    <div class="txt">
+      <div class="tag">Published paper</div>
+      <h3>Real-time object detection</h3>
+      <p>Detecting objects fast enough to matter, frame after frame. Speed and accuracy pull against each other, and the confidence threshold is where you choose.</p>
+      <p>Slide the threshold: low lets noise through, high starts missing real objects.</p>
+      <div class="chips"><span>detection</span><span>real-time</span><span>edge inference</span></div>
+      <button class="rm" data-rm="detect">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">live detector</div><div class="illu">illustration</div><canvas id="dDet" width="720" height="440"></canvas>
+      <div class="dbar"><label>confidence ≥ <input type="range" id="thr" min="0.1" max="0.95" step="0.01" value="0.5"><span id="thrV">0.50</span></label><span id="detStat"></span></div></div>
+  </div>
+
+  <div class="proj rv">
+    <div class="txt">
+      <div class="tag">Jain University · MTech thesis · gold medal</div>
+      <h3>Hyperspectral image reconstruction</h3>
+      <p>A normal camera sees three colors. A hyperspectral one sees dozens of narrow bands, including near-infrared where leaves glow bright.</p>
+      <p>Sweep the wavelength. Watch the leaves light up past 700 nm, where your eyes can't follow.</p>
+      <div class="chips"><span>spectral imaging</span><span>deep learning</span><span>reconstruction</span></div>
+      <button class="rm" data-rm="hyper">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">spectral bands</div><div class="illu">illustration</div><canvas id="dHsi" width="720" height="440"></canvas>
+      <div class="dbar"><label>λ <input type="range" id="lam" min="400" max="850" step="1" value="550"><span id="lamV">550 nm</span></label></div></div>
+  </div>
+
+  <div class="group" id="think">THINK · models</div>
+
+  <div class="proj flip rv">
+    <div class="txt">
+      <div class="tag">CaprusIT · AI &amp; ML Developer · Mar 2023 to May 2026</div>
+      <h3>Production AI: LLMs, vision and recommendations</h3>
+      <p>Over three years I built production AI across three products: <b>Menthra</b>, an LLM therapy companion with RAG, emotion and intent detection and a talking avatar; <b>Aauti</b>, computer vision and avatar video pipelines with Wav2Lip voice cloning R&amp;D; and <b>EmpowerMX</b>, BERT embeddings, clustering, classification and recommendation models for aviation maintenance on AWS. I also mentored the interns and freshers who joined the team.</p>
+      <p>Try a tiny version: ask anything about me. It searches a handful of facts and answers from the best match.</p>
+      <div class="chips"><span>LLMs</span><span>RAG</span><span>computer vision</span><span>BERT</span><span>AWS · Azure</span><span>mentoring</span></div>
+      <button class="rm" data-rm="caprus">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel" style="position:static;display:inline-block;margin-bottom:10px">ask my résumé</div>
+      <div class="rag">
+        <div class="ragq"><input id="ragIn" placeholder="e.g. What hardware has she built?" aria-label="Ask a question"><button id="ragGo">Ask</button></div>
+        <div class="presets" id="presets"></div>
+        <div class="hits" id="hits"></div>
+        <div class="answer" id="ans">Ask something to see retrieval at work.</div>
+        <div class="dbar" style="margin-top:0"><span>Keyword retrieval running in your browser. No model, no server.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group" id="build">BUILD · hardware</div>
+
+  <div class="proj rv">
+    <div class="txt">
+      <div class="tag">Embedded World NA · Edge AI Hackathon · Sep 2026</div>
+      <h3>Machine-vision waste sorter</h3>
+      <p>Two days, one Arduino Uno Q, a conveyor belt and a problem revealed on the morning of: sort waste into compost, recycling or trash and show the call on an OLED.</p>
+      <p>I led our team of four. Next step: the hackathon build had no actuator, so I'm adding one.</p>
+      <div class="badge">🏆 Runner-up · Sustainability track</div>
+      <div class="chips"><span>Arduino Uno Q</span><span>App Lab</span><span>vision</span><span>team lead</span></div>
+      <button class="rm" data-rm="waste">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">conveyor cam</div><div class="illu">illustration</div><canvas id="dWaste" width="720" height="440"></canvas></div>
+  </div>
+
+  <div class="proj flip rv">
+    <div class="txt">
+      <div class="tag">SJSU EE 271 · team of four · in progress</div>
+      <h3>Pipelined fixed-point CORDIC engine</h3>
+      <p>CORDIC computes sine, cosine and rotations using only shifts and adds, no multipliers. Our team is building a parameterized, pipelined version in SystemVerilog for motor control, with a PPA and accuracy study.</p>
+      <p>My piece: the parameterized barrel shifter that does every 2<sup>−i</sup> step. Watch the vector converge.</p>
+      <div class="chips"><span>SystemVerilog</span><span>fixed-point</span><span>ASIC flow</span><span>PPA</span></div>
+      <button class="rm" data-rm="cordic">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">cordic, step by step</div><canvas id="dCordic" width="720" height="380"></canvas>
+      <div class="dbar"><label>θ <input type="range" id="ang" min="-90" max="90" step="1" value="57"><span id="angV">57°</span></label><button id="cPlay">replay</button></div>
+      <table class="ctable" id="ctab"></table></div>
+  </div>
+
+  <div class="proj rv">
+    <div class="txt">
+      <div class="tag">GVPCE · BTech · team lead · 2018 to 2019</div>
+      <h3>Cardy Heart</h3>
+      <p>A solar-powered biomedical wearable: ECG, pulse and accelerometer sensors read through an SPI ADC on a Raspberry Pi, with an OLED display, alerts and an Android app. I led the team of four and wrote the acquisition firmware, alerts and app communication.</p>
+      <p>Next: taking it from prototype wiring to a custom PCB.</p>
+      <div class="chips"><span>wearable</span><span>Raspberry Pi</span><span>ECG</span><span>SPI · I²C</span><span>next: PCB</span></div>
+      <button class="rm" data-rm="cardy">Read more &rarr;</button>
+    </div>
+    <div class="demo"><div class="dlabel">signal</div><div class="illu">illustration</div><canvas id="dEcg" width="720" height="300"></canvas></div>
+  </div>
+
+  <!-- Bommala Koluvu: hidden for now. Remove this comment wrapper to show it again.
+  <div class="proj flip rv">
+    <div class="txt">
+      <div class="tag">Next build · January 2027</div>
+      <h3>An interactive Bommala Koluvu</h3>
+      <p>For Sankranthi I'm turning the traditional doll display into an installation that starts at the front door: dolls from home, miniatures, and my own electronics.</p>
+      <p>Hover over the steps.</p>
+      <div class="chips"><span>embedded</span><span>sensors</span><span>tradition × tech</span></div>
+    </div>
+    <div class="demo"><div class="dlabel">coming soon</div><canvas id="dKol" width="720" height="380"></canvas></div>
+  </div>
+  end Bommala Koluvu -->
+</section>
+
+<section class="journey" id="journey">
+  <div class="sec-head rv">
+    <div><div class="eyebrow">Signal path</div><h2>How I got <em>here.</em></h2></div>
+    <p>From electrical engineering, through vision and language models, back to hardware. Scroll to light up the trace.</p>
+  </div>
+  <div class="path" id="path">
+    <div class="trace"><i id="traceFill"></i></div>
+    <div class="stop"><div class="when">Now</div><h4>MS Electrical Engineering · San José State</h4><p>Digital design, SoCs and FPGAs, with a focus on running AI efficiently on small devices.</p></div>
+    <div class="stop"><div class="when">Sep 2026</div><h4>Runner-up · Embedded World NA Edge AI Hackathon</h4><p>Led a four-person team to second place in the Sustainability track.</p></div>
+    <div class="stop"><div class="when">Mar 2023 → May 2026</div><h4>AI &amp; ML Developer · CaprusIT</h4><p>Production AI for Menthra (LLM + RAG wellness), Aauti (vision and avatar video) and EmpowerMX (aviation maintenance ML). Mentored interns and freshers.</p></div>
+    <div class="stop"><div class="when">Mar 2022 → Feb 2023</div><h4>Software Developer · Votivesoft</h4><p>Web applications for e-Governance systems on the LAMP stack.</p></div>
+    <div class="stop"><div class="when">Gold medal</div><h4>MTech Data Science · Jain University</h4><p>AICTE-funded. Thesis on hyperspectral image reconstruction.</p></div>
+    <div class="stop"><div class="when">Nov 2023</div><h4>Advanced Certification in Deep Learning · IISc Bangalore</h4><p>Thesis on monocular depth estimation.</p></div>
+    <div class="stop"><div class="when">Dec 2020 → Jun 2021</div><h4>ADAS Engineering Intern · Continental</h4><p>Python development and testing of camera calibration algorithms in the ADAS business unit.</p></div>
+    <div class="stop"><div class="when">Where it started</div><h4>BTech EEE · GVPCE(A)</h4><p>NSS Coordinator for 100+ volunteers, IEEE student body executive, Rotaract, cultural club treasurer.</p></div>
+  </div>
+</section>
+
+<section class="notes" id="notes">
+  <div class="sec-head rv">
+    <div><div class="eyebrow">Field notes</div><h2>Things I'm <em>learning out loud.</em></h2></div>
+    <p>Short posts on hardware, models and the space between them.</p>
+  </div>
+  <div class="posts" id="posts"></div>
+</section>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true"><article class="reader"><button class="x" id="mx" aria-label="Close">×</button><div class="meta" id="mMeta"></div><h2 id="mTitle"></h2><div id="mBody"></div></article></div>
+
+<section class="about" id="about">
+  <svg id="plane" viewBox="0 0 24 24"><path d="M2 12 L22 3 L15 21 L11 13 Z" fill="#b5532a"/><path d="M11 13 L22 3" stroke="#f5eddd" stroke-width="1"/></svg>
+  <canvas class="trail" id="trail"></canvas>
+  <div class="about-grid">
+    <div class="rv">
+      <div class="eyebrow">About</div>
+      <h2>Engineer, mentor, <em>forever curious.</em></h2>
+      <p>I'm Sindhura, an electrical engineer who took the long way round. I spent years making models smart, and now I'm learning how to make them small, fast and efficient enough to live inside real devices.</p>
+      <p>I like work you can hold: a board on the bench, a camera that actually sees, an LED that lights up because a model decided it should. Long term, I want to design the hardware that AI runs on.</p>
+      <p>I've always cared about bringing people along, from leading 100+ NSS volunteers in college to training new engineers at work.</p>
+      <p style="font-family:var(--mono);font-size:13px;color:var(--mute);margin-top:22px">Sunnyvale, CA</p>
+    </div>
+    <div class="likes rv">
+      <div class="bp"><div class="sky"><svg viewBox="0 0 360 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g stroke="rgba(240,207,122,.45)" stroke-width="1" fill="none"><path d="M60 40 L105 58 L150 50 L186 80 L230 66"/><path d="M150 50 L160 110 L120 128"/></g><g fill="#fff"><circle class="tw" cx="60" cy="40" r="2.2"/><circle class="tw" cx="105" cy="58" r="1.8"/><circle class="tw" cx="150" cy="50" r="2.6"/><circle class="tw" cx="186" cy="80" r="1.8"/><circle class="tw" cx="230" cy="66" r="2.2"/><circle class="tw" cx="160" cy="110" r="1.8"/><circle class="tw" cx="120" cy="128" r="2"/><circle class="tw" cx="30" cy="110" r="1.2"/><circle class="tw" cx="210" cy="20" r="1.2"/><circle class="tw" cx="335" cy="130" r="1.4"/><circle class="tw" cx="90" cy="14" r="1"/><circle class="tw" cx="250" cy="132" r="1.1"/></g><circle cx="270" cy="78" r="20" fill="#E07A55"/><ellipse cx="270" cy="78" rx="34" ry="8" fill="none" stroke="rgba(240,207,122,.75)" stroke-width="2" transform="rotate(-18 270 78)"/><g class="orbit"><circle cx="270" cy="30" r="4" fill="#cfd6ff"/></g><circle cx="270" cy="78" r="48" fill="none" stroke="rgba(236,232,255,.12)" stroke-dasharray="3 5"/></svg></div><div class="main"><small>BOARDING PASS · AVIATION, SPACE &amp; ASTRONOMY</small><div class="route">HYD → SFO <span>→ ✦</span></div><div class="seat">SEAT · WINDOW, OVER THE WING</div><p>Aviation and astronomy nerd. I love the engineering of flight, right down to watching the wing flex, and I'm always looking up at the stars.</p></div><div class="stub"><svg width="54" height="54" viewBox="0 0 24 24"><path d="M2 12 L22 3 L15 21 L11 13 Z" fill="#f0cf7a"/></svg><span>GATE ✦</span></div></div>
+      <div class="hello"><b>Hello</b><b>నమస్తే</b><b>नमस्ते</b><span>English · Telugu · Hindi</span></div>
+      <div class="recipe"><small>RECIPE CARD</small><b>Cooking &amp; baking</b><ul><li>measure</li><li>taste</li><li>iterate</li></ul><svg class="t-cup" viewBox="0 0 64 64" aria-hidden="true"><g fill="none" stroke="#b5532a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><g class="steam"><path d="M18 20 q-4 -5 0 -10 t0 -10"/><path d="M27 20 q-4 -5 0 -10 t0 -10"/><path d="M36 20 q-4 -5 0 -10 t0 -10"/></g><path d="M10 24 h34 l-4 30 h-26 z" fill="rgba(216,155,43,.35)"/><path d="M44 30 q11 2 9 13 q-2 7 -11 5"/><path d="M17 34 h7 M17 41 h5 M17 48 h7"/></g></svg><svg class="t-spoon" viewBox="0 0 30 80" aria-hidden="true"><g fill="none" stroke="#b5532a" stroke-width="2.2" stroke-linecap="round"><path d="M15 4 v46"/><ellipse cx="15" cy="62" rx="8" ry="12" fill="#e9c9a0"/></g></svg><svg class="t-pin" viewBox="0 0 130 24" aria-hidden="true"><g fill="#e9d3a8" stroke="#b5532a" stroke-width="2.2"><rect x="16" y="4" width="98" height="16" rx="8"/><rect x="2" y="9" width="15" height="6" rx="3" fill="none"/><rect x="113" y="9" width="15" height="6" rx="3" fill="none"/></g></svg><svg class="t-bowl" viewBox="0 0 110 100" aria-hidden="true"><g stroke="#b5532a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="55" cy="58" rx="44" ry="8" fill="#f3e1b8"/><g class="whisk" fill="none"><path d="M70 4 l-10 40"/><ellipse cx="58" cy="54" rx="7" ry="14" transform="rotate(14 58 54)"/><ellipse cx="58" cy="54" rx="3" ry="14" transform="rotate(14 58 54)"/></g><path d="M11 58 q4 36 44 36 q40 0 44 -36" fill="rgba(216,155,43,.55)"/><path d="M11 58 q44 10 88 0" fill="none"/></g></svg><p style="font-size:13px;color:#6f665b;margin-top:6px;font-style:italic">Recipes are just well-documented experiments.</p></div>
+      <div class="score"><span class="live">● LIVE</span><small>SPORTS · PLAY + WATCH</small><div class="board"><span>🎾 Tennis</span><span>PLAY</span><span>🏸 Badminton</span><span>PLAY</span><span>🏏 Cricket</span><span>WATCH</span><span>♟ Chess</span><span>WATCH</span></div><p>I play tennis and badminton, and I'll watch almost any sport, especially multi-sport events.</p></div>
+      <div class="craft"><div class="ic">✂️</div><b>Arts &amp; crafts</b><p>Making things with my hands, even when there's no circuit involved.</p></div>
+      <div class="like l5"><div><b>Currently</b><br><span>Exploring digital design, from SystemVerilog RTL to FPGA and ASIC flows, building toward my thesis, and looking for Summer 2027 internships in hardware, embedded and edge AI.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="eyebrow">I/O</div>
+  <h2>Let's <em>connect.</em></h2>
+  <p>Looking for Summer 2027 internships in digital design, FPGA, embedded systems and edge AI hardware. Happy to talk projects too.</p>
+  <div class="pins">
+    <a class="pin" href="https://www.linkedin.com/in/sindhura-kuchibhotla-7855b9aa" target="_blank" rel="noopener"><div class="leg"></div><b>LinkedIn</b><span>pin 01</span></a>
+    <a class="pin" href="https://github.com/SindhuraKuchibhotla" target="_blank" rel="noopener"><div class="leg"></div><b>GitHub</b><span>pin 02</span></a>
+    <a class="pin todo" href="#contact"><div class="leg"></div><b>Résumé</b><span>pin 03 · add link</span></a>
+    <a class="pin todo" href="#contact"><div class="leg"></div><b>Scholar</b><span>pin 04 · add link</span></a>
+    <a class="pin todo" href="#contact"><div class="leg"></div><b>Email</b><span>pin 05 · add</span></a>
+  </div>
+  <div class="chipbar">SK · EDGE AI</div>
+</section>
+<footer>Designed and built by Sindhura Kuchibhotla · <a href="https://github.com/SindhuraKuchibhotla" target="_blank" rel="noopener" style="color:#d4a84b">GitHub</a> · <a href="https://www.linkedin.com/in/sindhura-kuchibhotla-7855b9aa" target="_blank" rel="noopener" style="color:#d4a84b">LinkedIn</a></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = s => document.querySelector(s);
+function hiDPI(c){ const r = c.getContext('2d'); return r; }
+
+/* reveal */
+const rvIO = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); rvIO.unobserve(e.target);} }),{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>rvIO.observe(el));
+
+/* run-when-visible helper */
+function whenVisible(el, fn){
+  let on = false, raf = 0, t0 = performance.now();
+  const loop = t=>{ fn((t-t0)/1000); if(on) raf = requestAnimationFrame(loop); };
+  new IntersectionObserver(es=>{ es.forEach(e=>{ if(e.isIntersecting && !on){ on = true; raf = requestAnimationFrame(loop);} else if(!e.isIntersecting){ on = false; cancelAnimationFrame(raf);} }); },{threshold:0}).observe(el);
+}
+
+/* ================= HERO: 3D board ================= */
+(function(){
+  const canvas = $('#board'); let renderer;
+  try{ renderer = new THREE.WebGLRenderer({canvas, antialias:true}); }catch(e){ canvas.style.background='radial-gradient(#1f5a45,#0e2f26)'; return; }
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.shadowMap.enabled = true;
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0e2f26); scene.fog = new THREE.Fog(0x0e2f26, 14, 30);
+  const camera = new THREE.PerspectiveCamera(40,1,0.1,100);
+  scene.add(new THREE.HemisphereLight(0xfff1d6, 0x0a1f19, 0.75));
+  const key = new THREE.DirectionalLight(0xffe2b0, 0.9); key.position.set(-5,9,6); key.castShadow = true; key.shadow.mapSize.set(1024,1024);
+  Object.assign(key.shadow.camera,{left:-9,right:9,top:7,bottom:-7}); scene.add(key);
+
+  /* PCB texture with traces */
+  const TW = 2048, TH = 1280, BW = 16, BH = 10;
+  const tc = document.createElement('canvas'); tc.width = TW; tc.height = TH; const g = tc.getContext('2d');
+  g.fillStyle = '#123d31'; g.fillRect(0,0,TW,TH);
+  // faint copper pour pattern
+  g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 2;
+  for(let x=0;x<TW;x+=32){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,TH); g.stroke(); }
+  for(let y=0;y<TH;y+=32){ g.beginPath(); g.moveTo(0,y); g.lineTo(TW,y); g.stroke(); }
+  let seed = 7; const rnd = ()=>{ seed = (seed*16807)%2147483647; return seed/2147483647; };
+  const cx0 = TW/2-205, cx1 = TW/2+205, cy0 = TH/2-205, cy1 = TH/2+205;
+  const traces = [];
+  const M = 40;
+  const sides = [
+    {n:9, start:k=>[cx0, cy0+30+k*43], out:[-1,0], perp:[0,1]},
+    {n:9, start:k=>[cx1, cy0+30+k*43], out:[1,0], perp:[0,1]},
+    {n:9, start:k=>[cx0+30+k*43, cy0], out:[0,-1], perp:[1,0]},
+    {n:9, start:k=>[cx0+30+k*43, cy1], out:[0,1], perp:[1,0]}
+  ];
+  sides.forEach(sd=>{
+    for(let k=0;k<sd.n;k++){
+      const p0 = sd.start(k);
+      const l1 = 40+rnd()*140;
+      const p1 = [p0[0]+sd.out[0]*l1, p0[1]+sd.out[1]*l1];
+      const sgn = (k < sd.n/2) ? -1 : 1, dl = 40+rnd()*180;
+      const p2 = [p1[0]+(sd.out[0]+sd.perp[0]*sgn)*dl, p1[1]+(sd.out[1]+sd.perp[1]*sgn)*dl];
+      p2[0] = Math.max(M,Math.min(TW-M,p2[0])); p2[1] = Math.max(M,Math.min(TH-M,p2[1]));
+      const len3 = 120+rnd()*500;
+      let p3 = [p2[0]+sd.out[0]*len3, p2[1]+sd.out[1]*len3];
+      p3[0] = Math.max(M,Math.min(TW-M,p3[0])); p3[1] = Math.max(M,Math.min(TH-M,p3[1]));
+      traces.push([p0,p1,p2,p3]);
+    }
+  });
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  traces.forEach(t=>{
+    g.strokeStyle = '#b88a35'; g.lineWidth = 9; g.beginPath(); g.moveTo(...t[0]); t.slice(1).forEach(p=>g.lineTo(...p)); g.stroke();
+    g.strokeStyle = '#e2bb63'; g.lineWidth = 3; g.beginPath(); g.moveTo(...t[0]); t.slice(1).forEach(p=>g.lineTo(...p)); g.stroke();
+    const e = t[3]; g.fillStyle = '#d4a84b'; g.beginPath(); g.arc(e[0],e[1],14,0,7); g.fill(); g.fillStyle = '#0b231c'; g.beginPath(); g.arc(e[0],e[1],5,0,7); g.fill();
+  });
+  // silkscreen
+  g.fillStyle = 'rgba(245,237,221,.75)'; g.font = '500 30px JetBrains Mono, monospace';
+  g.fillText('SK-EDGE  rev A', 70, TH-70); g.fillText('U1', cx1+20, cy0-20);
+  g.font = '500 22px JetBrains Mono, monospace';
+  [['C1',300,250],['C2',1700,1000],['R7',1500,220],['J1',120,140],['LED1',1820,640],['SJSU',1780,1180]].forEach(([s,x,y])=>g.fillText(s,x,y));
+  g.strokeStyle = 'rgba(245,237,221,.6)'; g.lineWidth = 3; g.strokeRect(cx0-24,cy0-24,458,458);
+  const pcbTex = new THREE.CanvasTexture(tc); pcbTex.encoding = THREE.sRGBEncoding; pcbTex.anisotropy = 8;
+
+  const edge = new THREE.MeshStandardMaterial({color:0x0b231c, roughness:.8});
+  const top = new THREE.MeshStandardMaterial({map:pcbTex, roughness:.55, metalness:.15});
+  const board = new THREE.Group(); scene.add(board);
+  const pcb = new THREE.Mesh(new THREE.BoxGeometry(BW,0.18,BH), [edge,edge,top,edge,edge,edge]);
+  pcb.receiveShadow = true; board.add(pcb);
+
+  /* chip */
+  const cc = document.createElement('canvas'); cc.width = cc.height = 512; const c2 = cc.getContext('2d');
+  c2.fillStyle = '#16191a'; c2.fillRect(0,0,512,512);
+  c2.fillStyle = '#d4a84b'; c2.font = 'italic 300 118px Fraunces, Georgia, serif'; c2.textAlign = 'center'; c2.fillText('SK', 256, 250);
+  c2.font = '500 30px JetBrains Mono, monospace'; c2.fillStyle = '#c9bfa9'; c2.fillText('DIGITAL · FPGA · AI', 256, 320);
+  c2.font = '400 22px JetBrains Mono, monospace'; c2.fillStyle = '#7d766a'; c2.fillText('REV A', 256, 360);
+  c2.beginPath(); c2.arc(60,60,14,0,7); c2.fillStyle = '#2b2f30'; c2.fill();
+  const chipTex = new THREE.CanvasTexture(cc); chipTex.encoding = THREE.sRGBEncoding;
+  const cS = 410/TW*BW; // chip size in world
+  const chipDark = new THREE.MeshStandardMaterial({color:0x16191a, roughness:.45, metalness:.3});
+  const chip = new THREE.Mesh(new THREE.BoxGeometry(cS,0.32,cS), [chipDark,chipDark,new THREE.MeshStandardMaterial({map:chipTex, roughness:.4, metalness:.25}),chipDark,chipDark,chipDark]);
+  chip.position.y = 0.25; chip.castShadow = true; board.add(chip);
+  const pinGeo = new THREE.BoxGeometry(0.12,0.05,0.3), pinMat = new THREE.MeshStandardMaterial({color:0xd4a84b, metalness:.9, roughness:.3});
+  const pins = new THREE.InstancedMesh(pinGeo, pinMat, 36); const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), s1 = new THREE.Vector3(1,1,1);
+  let pi = 0;
+  for(let k=0;k<9;k++){
+    const off = -cS/2 + (30+k*43)/410*cS;
+    [[off,-cS/2-0.12,0],[off,cS/2+0.12,0],[-cS/2-0.12,off,1],[cS/2+0.12,off,1]].forEach(([a,b,r])=>{
+      q.setFromAxisAngle(new THREE.Vector3(0,1,0), r?Math.PI/2:0);
+      m4.compose(new THREE.Vector3(r?a:a, 0.12, r?b:b).set(r?a:a,0.12,r?b:b), q, s1);
+      if(!r) m4.compose(new THREE.Vector3(a,0.12,b), q, s1); else m4.compose(new THREE.Vector3(a,0.12,b), q, s1);
+      pins.setMatrixAt(pi++, m4);
+    });
+  }
+  board.add(pins);
+
+  /* components */
+  const capMat = new THREE.MeshStandardMaterial({color:0x2b2f33, metalness:.6, roughness:.35});
+  const capTop = new THREE.MeshStandardMaterial({color:0xb5532a, roughness:.5});
+  [[-5.6,-3.2],[-4.9,-3.2],[5.3,2.9],[6.1,2.9],[-6.4,3.1]].forEach(([x,z],k)=>{
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.7,24), capMat); c.position.set(x,0.44,z); c.castShadow = true; board.add(c);
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.281,0.281,0.04,24), capTop); t.position.set(x,0.8,z); board.add(t);
+  });
+  const resMat = new THREE.MeshStandardMaterial({color:0x1b1b1b, roughness:.5});
+  for(let k=0;k<10;k++){ const r = new THREE.Mesh(new THREE.BoxGeometry(0.34,0.1,0.18), resMat); r.position.set(-2.8+k*0.62*(k%2?1:1), 0.14, 3.6 + (k%2)*0.35); r.castShadow = true; board.add(r); }
+  const hdr = new THREE.Mesh(new THREE.BoxGeometry(3.4,0.35,0.42), new THREE.MeshStandardMaterial({color:0x111111, roughness:.6}));
+  hdr.position.set(3.8,0.27,-4.3); hdr.castShadow = true; board.add(hdr);
+  for(let k=0;k<12;k++){ const p = new THREE.Mesh(new THREE.BoxGeometry(0.06,0.5,0.06), pinMat); p.position.set(2.3+k*0.27,0.6,-4.3); board.add(p); }
+  const led = new THREE.Mesh(new THREE.SphereGeometry(0.14,16,16), new THREE.MeshBasicMaterial({color:0x7bd389})); led.position.set(6.8,0.2,-0.4); board.add(led);
+  const ledL = new THREE.PointLight(0x7bd389, 0.8, 2.5); ledL.position.set(6.8,0.5,-0.4); board.add(ledL);
+  const cam = new THREE.Group();
+  const camBody = new THREE.Mesh(new THREE.BoxGeometry(1.1,0.25,1.1), new THREE.MeshStandardMaterial({color:0x1d2124, roughness:.5}));
+  const camLens = new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.36,0.45,32), new THREE.MeshStandardMaterial({color:0x0a0a0c, roughness:.2, metalness:.6}));
+  camLens.position.y = 0.33; const glass = new THREE.Mesh(new THREE.CircleGeometry(0.22,32), new THREE.MeshStandardMaterial({color:0x223355, roughness:.05, metalness:.9, emissive:0x112244}));
+  glass.rotation.x = -Math.PI/2; glass.position.y = 0.56; cam.add(camBody,camLens,glass); cam.position.set(-5.4,0.2,0.6); board.add(cam);
+  cam.traverse(o=>{ if(o.isMesh) o.castShadow = true; });
+
+  /* pulses along traces */
+  const toW = p => new THREE.Vector3((p[0]/TW-.5)*BW, 0.12, (p[1]/TH-.5)*BH);
+  const paths = traces.map(t=>{ const pts = t.map(toW); const segs = []; let L = 0; for(let i=1;i<pts.length;i++){ const l = pts[i].distanceTo(pts[i-1]); segs.push(l); L += l; } return {pts, segs, L}; });
+  const NP = 46;
+  const pulseMat = new THREE.MeshBasicMaterial({color:0xfff0b8});
+  const pulses = new THREE.InstancedMesh(new THREE.SphereGeometry(0.07,10,10), pulseMat, NP);
+  const glowTex = (()=>{ const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); const gr = x.createRadialGradient(32,32,0,32,32,32); gr.addColorStop(0,'rgba(255,230,160,1)'); gr.addColorStop(.3,'rgba(240,200,110,.5)'); gr.addColorStop(1,'rgba(240,200,110,0)'); x.fillStyle = gr; x.fillRect(0,0,64,64); return new THREE.CanvasTexture(c); })();
+  const glows = [];
+  const P = []; for(let i=0;i<NP;i++){ P.push({path:i%paths.length, t:rnd(), sp:0.12+rnd()*0.2, dir: rnd()<.5?1:-1}); const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true})); sp.scale.set(0.6,0.6,0.6); board.add(sp); glows.push(sp); }
+  board.add(pulses);
+  const tmp = new THREE.Vector3();
+  function along(pa, t, out){ let d = t*pa.L; for(let i=0;i<pa.segs.length;i++){ if(d <= pa.segs[i]){ return out.lerpVectors(pa.pts[i], pa.pts[i+1], d/pa.segs[i]); } d -= pa.segs[i]; } return out.copy(pa.pts[pa.pts.length-1]); }
+
+  const ndc = new THREE.Vector2(); addEventListener('pointermove', e=>{ ndc.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1); }, {passive:true});
+  const hero = $('#top'), heroText = $('#heroText'), fade = $('#fade');
+  function resize(){ renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+  addEventListener('resize', resize); resize();
+  const A = {p:new THREE.Vector3(-1.5,10.5,12.8), t:new THREE.Vector3(-4.2,0,0.4)}, B = {p:new THREE.Vector3(0,3.2,0.25), t:new THREE.Vector3(0,0,0)};
+  const cp = A.p.clone(), ct = A.t.clone(), wp = new THREE.Vector3(), wt = new THREE.Vector3();
+  let prev = performance.now();
+  function frame(now){
+    const dt = Math.min(.05,(now-prev)/1000); prev = now;
+    const h = hero.offsetHeight - innerHeight, p = Math.min(1, Math.max(0, scrollY/h));
+    if(scrollY < hero.offsetHeight + 50){
+      const e = p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2;
+      const far = camera.aspect < 0.9 ? 1.6 : 1;
+      wp.lerpVectors(A.p, B.p, e); wt.lerpVectors(A.t, B.t, e);
+      wp.sub(wt).multiplyScalar(far*(1-e)+e).add(wt);
+      const k = reduce ? 1 : 1-Math.pow(0.002, dt);
+      cp.lerp(wp,k); ct.lerp(wt,k); camera.position.copy(cp); camera.lookAt(ct);
+      const tilt = (1-p);
+      board.rotation.x += ((-ndc.y*0.08*tilt) - board.rotation.x)*0.06;
+      board.rotation.z += ((-ndc.x*0.08*tilt) - board.rotation.z)*0.06;
+      for(let i=0;i<NP;i++){
+        const o = P[i]; o.t += o.sp*dt*(1+p*2)*(reduce?0:1); if(o.t>1){ o.t = 0; o.path = Math.floor(rnd()*paths.length); }
+        const tt = o.dir>0 ? o.t : 1-o.t;
+        along(paths[o.path], tt, tmp); m4.makeTranslation(tmp.x, tmp.y+0.02, tmp.z); pulses.setMatrixAt(i, m4); glows[i].position.set(tmp.x, tmp.y+0.05, tmp.z);
+      }
+      pulses.instanceMatrix.needsUpdate = true;
+      led.material.color.setHSL(0.36, .55, .45+.2*Math.sin(now/400)); ledL.intensity = .5+.4*Math.sin(now/400);
+      heroText.style.opacity = Math.max(0, 1-p*2.6); hero.style.setProperty('--hg', Math.max(0, 1-p*2.6)); heroText.style.transform = `translateY(${-p*80}px)`;
+      fade.style.opacity = Math.max(0, (p-0.78)/0.22);
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ================= boot terminal ================= */
+(function(){
+  const lines = [
+    ['d','$ ./boot --user sindhura'],
+    ['','[ <span class="ok">OK</span> ] power rails ............. EEE · GVPCE(A)'],
+    ['','[ <span class="ok">OK</span> ] perception core ......... ADAS @ Continental · depth @ IISc'],
+    ['','[ <span class="ok">OK</span> ] spectral unit ........... MTech, Jain University <span class="g">★ gold</span>'],
+    ['','[ <span class="ok">OK</span> ] production AI ........... 3 yrs @ CaprusIT'],
+    ['','[ <span class="ok">OK</span> ] people module ........... mentor · team lead · NSS 100+'],
+    ['','[ <span class="g">..</span> ] loading bitstream ....... MSEE @ San José State'],
+    ['','[ <span class="g">..</span> ] scanning for ............ Summer 2027 internships'],
+    ['d','$ <span class="cur"></span>']
+  ];
+  const out = $('#termOut'); let started = false;
+  new IntersectionObserver(es=>{ if(es[0].isIntersecting && !started){ started = true; let i = 0;
+    const next = ()=>{ if(i>=lines.length) return; const d = document.createElement('div'); if(lines[i][0]) d.className = lines[i][0]; d.innerHTML = lines[i][1]; out.appendChild(d); i++; setTimeout(next, reduce?0:340); };
+    next(); } },{threshold:.4}).observe($('#term'));
+})();
+
+/* ================= demos ================= */
+const inferno = [[0,[252,255,164]],[0.25,[249,142,9]],[0.5,[188,55,84]],[0.75,[87,16,110]],[1,[10,4,30]]];
+function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i++){ if(d<=inferno[i][0]){ const a = inferno[i-1], b = inferno[i], t = (d-a[0])/(b[0]-a[0]); return `rgb(${a[1].map((v,k)=>Math.round(v+(b[1][k]-v)*t)).join(',')})`; } } return 'rgb(10,4,30)'; }
+
+/* depth */
+(function(){
+  const c = $('#dDepth'), x = c.getContext('2d'), W = c.width, H = c.height, hy = H*0.44, vx = W*0.5;
+  let split = W*0.5, drag = false;
+  const pos = e=>{ const r = c.getBoundingClientRect(); return (e.clientX-r.left)/r.width*W; };
+  c.addEventListener('pointerdown', e=>{ drag = true; split = pos(e); c.setPointerCapture(e.pointerId); });
+  c.addEventListener('pointermove', e=>{ if(drag) split = pos(e); });
+  c.addEventListener('pointerup', ()=>drag = false);
+  const cars = [{lane:-1,z:.3,col:'#b5532a'},{lane:1,z:.55,col:'#e8dcc4'},{lane:-1,z:.75,col:'#1f5a45'},{lane:1,z:.15,col:'#d89b2b'}];
+  const trees = []; for(let k=0;k<9;k++) trees.push({side:k%2?1:-1, z:k/9});
+  function proj(lane, z){ const y = H - z*(H-hy), s = 1 - z*0.9; return {x: vx + lane*W*0.24*s, y, s}; }
+  function scene(mode, t){
+    // sky
+    if(mode==='rgb'){ const gr = x.createLinearGradient(0,0,0,hy); gr.addColorStop(0,'#2a4a6b'); gr.addColorStop(1,'#e8b86b'); x.fillStyle = gr; } else x.fillStyle = cmap(1);
+    x.fillRect(0,0,W,hy+1);
+    if(mode==='rgb'){ x.fillStyle = '#3b4f3a'; x.beginPath(); x.moveTo(0,hy); for(let i=0;i<=10;i++) x.lineTo(i*W/10, hy - 20 - 18*Math.sin(i*1.7)); x.lineTo(W,hy); x.fill(); }
+    // ground strips
+    for(let y=hy; y<H; y+=3){
+      const z = (H-y)/(H-hy), s = 1 - z*0.9, half = W*0.42*s;
+      if(mode==='rgb'){ x.fillStyle = '#4e6b3d'; x.fillRect(0,y,W,3); x.fillStyle = '#3d3a37'; x.fillRect(vx-half,y,half*2,3);
+        const dash = Math.floor((z*40 - t*2)%2+2)%2; if(dash===0){ x.fillStyle = '#efe4cf'; x.fillRect(vx-2*s-1,y,4*s+2,3); } }
+      else { x.fillStyle = cmap(z*0.95); x.fillRect(0,y,W,3); }
+    }
+    // trees + cars far to near
+    const objs = [];
+    trees.forEach(tr=>{ const z = ((tr.z - t*0.05)%1+1)%1; objs.push({z, draw:()=>{ const p = proj(tr.side*2.1, z); const h = 150*p.s, w = 54*p.s;
+      x.fillStyle = mode==='rgb' ? '#5a3b2e' : cmap(z); x.fillRect(p.x-4*p.s, p.y-h*0.45, 8*p.s, h*0.45);
+      x.fillStyle = mode==='rgb' ? '#2f5a35' : cmap(z); x.beginPath(); x.ellipse(p.x, p.y-h*0.6, w, h*0.4, 0, 0, 7); x.fill(); }}); });
+    cars.forEach(cr=>{ const z = ((cr.z - t*0.03*(cr.lane>0?1.4:0.8))%0.9+0.9)%0.9+0.05; objs.push({z, draw:()=>{ const p = proj(cr.lane*0.45, z); const w = 120*p.s, h = 62*p.s;
+      x.fillStyle = mode==='rgb' ? cr.col : cmap(z); x.fillRect(p.x-w/2, p.y-h, w, h*0.7); x.fillRect(p.x-w*0.35, p.y-h*1.35, w*0.7, h*0.45);
+      if(mode==='rgb'){ x.fillStyle = '#9fc3d8'; x.fillRect(p.x-w*0.3, p.y-h*1.28, w*0.6, h*0.32); x.fillStyle = '#111'; x.fillRect(p.x-w*0.45, p.y-h*0.32, w*0.2, h*0.32); x.fillRect(p.x+w*0.25, p.y-h*0.32, w*0.2, h*0.32); x.fillStyle = '#ffd27a'; x.fillRect(p.x-w*0.46,p.y-h*0.62,w*0.12,h*0.1); x.fillRect(p.x+w*0.34,p.y-h*0.62,w*0.12,h*0.1); } }}); });
+    objs.sort((a,b)=>b.z-a.z).forEach(o=>o.draw());
+  }
+  whenVisible(c, t=>{
+    if(!drag) split = W*(0.5+0.32*Math.sin(t*0.6));
+    x.save(); scene('rgb', t); x.restore();
+    x.save(); x.beginPath(); x.rect(split,0,W-split,H); x.clip(); scene('depth', t); x.restore();
+    x.fillStyle = '#f0cf7a'; x.fillRect(split-1.5,0,3,H);
+    x.beginPath(); x.arc(split,H/2,14,0,7); x.fill(); x.fillStyle = '#111613'; x.font = '600 14px JetBrains Mono'; x.textAlign = 'center'; x.fillText('⟷', split, H/2+5);
+  });
+})();
+
+/* detection */
+(function(){
+  const c = $('#dDet'), x = c.getContext('2d'), W = c.width, H = c.height;
+  const thr = $('#thr'), thrV = $('#thrV'), stat = $('#detStat');
+  const kinds = [{n:'person',col:'#d89b2b',w:34,h:80},{n:'car',col:'#b5532a',w:120,h:64},{n:'bike',col:'#7bd389',w:60,h:56},{n:'dog',col:'#e8dcc4',w:54,h:38}];
+  let seed = 3; const r = ()=>{ seed = (seed*16807)%2147483647; return seed/2147483647; };
+  const objs = []; for(let i=0;i<8;i++){ const k = kinds[i%4]; objs.push({k, x:r()*W, y:H*0.45+r()*H*0.45, vx:(r()-.5)*60*(k.n==='car'?2.4:1), conf:0.55+r()*0.42}); }
+  whenVisible(c, t=>{
+    const th = +thr.value; thrV.textContent = th.toFixed(2);
+    x.fillStyle = '#1a201c'; x.fillRect(0,0,W,H);
+    x.fillStyle = '#232b25'; x.fillRect(0,H*0.42,W,H*0.58);
+    x.strokeStyle = 'rgba(240,207,122,.12)'; x.setLineDash([18,14]); x.beginPath(); x.moveTo(0,H*0.72); x.lineTo(W,H*0.72); x.stroke(); x.setLineDash([]);
+    x.fillStyle = '#2c3530'; for(let i=0;i<7;i++){ x.fillRect(i*110+10, H*0.18-((i*37)%50), 80, H*0.24+((i*37)%50)); }
+    let shown = 0, missed = 0, fp = 0;
+    const dets = [];
+    objs.forEach((o,i)=>{
+      o.x += o.vx*0.016; if(o.x<-140) o.x = W+20; if(o.x>W+140) o.x = -20;
+      const k = o.k, s = 0.7 + (o.y-H*0.45)/(H*0.45)*0.6, w = k.w*s, h = k.h*s, bx = o.x - w/2, by = o.y - h;
+      x.fillStyle = k.col; x.globalAlpha = .85;
+      if(k.n==='person'){ x.beginPath(); x.arc(o.x, by+h*0.14, h*0.12, 0, 7); x.fill(); x.fillRect(o.x-w*0.3, by+h*0.28, w*0.6, h*0.72); }
+      else if(k.n==='car'){ x.fillRect(bx, by+h*0.35, w, h*0.5); x.fillRect(bx+w*0.2, by, w*0.6, h*0.4); x.fillStyle = '#111'; x.beginPath(); x.arc(bx+w*0.22, by+h*0.88, h*0.13,0,7); x.arc(bx+w*0.78, by+h*0.88, h*0.13,0,7); x.fill(); }
+      else if(k.n==='bike'){ x.strokeStyle = k.col; x.lineWidth = 3; x.beginPath(); x.arc(bx+w*0.2, by+h*0.75, h*0.22,0,7); x.stroke(); x.beginPath(); x.arc(bx+w*0.8, by+h*0.75, h*0.22,0,7); x.stroke(); x.fillRect(bx+w*0.3, by+h*0.2, w*0.4, h*0.35); }
+      else { x.beginPath(); x.ellipse(o.x, by+h*0.6, w*0.45, h*0.32, 0, 0, 7); x.fill(); x.beginPath(); x.arc(bx+w*0.9, by+h*0.35, h*0.2,0,7); x.fill(); }
+      x.globalAlpha = 1;
+      const cf = Math.max(0.05, Math.min(0.99, o.conf + 0.06*Math.sin(t*3+i)));
+      dets.push({bx:bx-3+2*Math.sin(t*7+i), by:by-3, w:w+6, h:h+6, cf, n:k.n, real:true});
+    });
+    for(let k=0;k<3;k++){ const cf = 0.12 + 0.22*(0.5+0.5*Math.sin(t*1.3+k*2)); dets.push({bx:80+k*230+30*Math.sin(t+k), by:H*0.2+k*20, w:50, h:44, cf, n:['person','bike','dog'][k], real:false}); }
+    dets.forEach(d=>{
+      if(d.cf < th){ if(d.real) missed++; return; }
+      if(d.real) shown++; else fp++;
+      const col = d.real ? '#f0cf7a' : '#e86a50';
+      x.strokeStyle = col; x.lineWidth = 2; x.strokeRect(d.bx, d.by, d.w, d.h);
+      const lab = `${d.n} ${d.cf.toFixed(2)}`; x.font = '500 12px JetBrains Mono'; const tw = x.measureText(lab).width + 8;
+      x.fillStyle = col; x.fillRect(d.bx, d.by-17, tw, 17); x.fillStyle = '#111613'; x.textAlign = 'left'; x.fillText(lab, d.bx+4, d.by-5);
+    });
+    x.fillStyle = 'rgba(11,16,13,.75)'; x.fillRect(W-148, H-34, 140, 26); x.fillStyle = '#7bd389'; x.font = '500 12px JetBrains Mono'; x.textAlign = 'left'; x.fillText(`● ${Math.round(29+Math.sin(t*2))} FPS`, W-138, H-16);
+    stat.textContent = `found ${shown}/8 · missed ${missed} · false ${fp}`;
+  });
+})();
+
+/* hyperspectral */
+(function(){
+  const c = $('#dHsi'), x = c.getContext('2d'), W = c.width, H = c.height, lam = $('#lam'), lamV = $('#lamV');
+  const sig = v=>1/(1+Math.exp(-v)), gs = (l,m,s)=>Math.exp(-Math.pow((l-m)/s,2));
+  const R = {
+    sky: l=>0.18+0.72*gs(l,450,70),
+    leaf: l=>0.06+0.28*gs(l,550,32)+0.78*sig((l-712)/14),
+    fruit: l=>0.08+0.82*sig((l-585)/18),
+    soil: l=>0.12+0.32*(l-400)/450,
+    flower: l=>0.7+0.15*sig((l-500)/40)
+  };
+  const cols = {sky:'#8fb7e0', leaf:'#7bd389', fruit:'#f0a24b', soil:'#b48a6a', flower:'#f5eddd'};
+  function wl(l){ let r=0,g=0,b=0; if(l<440){r=-(l-440)/40;b=1}else if(l<490){g=(l-440)/50;b=1}else if(l<510){g=1;b=-(l-510)/20}else if(l<580){r=(l-510)/70;g=1}else if(l<645){r=1;g=-(l-645)/65}else if(l<=700){r=1}else{ return [200,190,215]; } return [r*255,g*255,b*255]; }
+  function shade(reg, l){ const v = R[reg](l), w = wl(l); const m = 0.18+0.82*v; return `rgb(${w.map(c=>Math.round(c*m*0.95+10)).join(',')})`; }
+  let hover = null; c.addEventListener('pointermove', e=>{ const r = c.getBoundingClientRect(); hover = [(e.clientX-r.left)/r.width*W, (e.clientY-r.top)/r.height*H]; }); c.addEventListener('pointerleave', ()=>hover=null);
+  whenVisible(c, t=>{
+    const l = +lam.value; lamV.textContent = l + ' nm' + (l>700?' · NIR':'');
+    const IW = W*0.62;
+    x.fillStyle = shade('sky',l); x.fillRect(0,0,IW,H);
+    x.fillStyle = shade('soil',l); x.beginPath(); x.moveTo(0,H*0.7); x.quadraticCurveTo(IW*0.5,H*0.58,IW,H*0.68); x.lineTo(IW,H); x.lineTo(0,H); x.fill();
+    x.fillStyle = shade('leaf',l);
+    [[110,170,90,60],[200,130,80,70],[300,190,95,62],[160,250,110,55],[330,280,80,50],[250,230,70,46]].forEach(([a,b,rx,ry],k)=>{ x.beginPath(); x.ellipse(a,b,rx,ry,k*0.5,0,7); x.fill(); });
+    x.fillStyle = shade('soil',l); x.fillRect(222,250,18,140);
+    x.fillStyle = shade('fruit',l); [[150,200],[270,160],[320,240],[200,280]].forEach(([a,b])=>{ x.beginPath(); x.arc(a,b,20,0,7); x.fill(); });
+    x.fillStyle = shade('flower',l); [[60,370],[90,392],[380,380]].forEach(([a,b])=>{ x.beginPath(); x.arc(a,b,12,0,7); x.fill(); });
+    // spectra panel
+    const px = IW+18, pw = W-IW-30, py = 40, ph = H-110;
+    x.fillStyle = '#0b100d'; x.fillRect(IW,0,W-IW,H);
+    x.strokeStyle = 'rgba(212,168,75,.25)'; x.strokeRect(px,py,pw,ph);
+    x.fillStyle = 'rgba(200,190,215,.06)'; x.fillRect(px+(700-400)/450*pw, py, (150)/450*pw, ph);
+    ['sky','leaf','fruit','soil'].forEach(reg=>{ x.strokeStyle = cols[reg]; x.lineWidth = 2; x.beginPath(); for(let L=400;L<=850;L+=5){ const X = px+(L-400)/450*pw, Y = py+ph-R[reg](L)*ph; L===400?x.moveTo(X,Y):x.lineTo(X,Y); } x.stroke(); });
+    const LX = px+(l-400)/450*pw; x.strokeStyle = '#f0cf7a'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(LX,py); x.lineTo(LX,py+ph); x.stroke();
+    x.font = '500 11px JetBrains Mono'; x.textAlign = 'left';
+    ['sky','leaf','fruit','soil'].forEach((reg,k)=>{ x.fillStyle = cols[reg]; x.fillRect(px+(k%2)*(pw/2), H-56+Math.floor(k/2)*18, 10, 10); x.fillStyle = '#cfc5b0'; x.fillText(reg, px+14+(k%2)*(pw/2), H-47+Math.floor(k/2)*18); });
+    x.fillStyle = '#8f8676'; x.fillText('400', px, py+ph+14); x.textAlign = 'right'; x.fillText('850 nm', px+pw, py+ph+14); x.textAlign = 'center'; x.fillText('visible | NIR', px+(700-400)/450*pw, py-8);
+    x.textAlign = 'left'; x.fillStyle = '#d4a84b'; x.fillText('reflectance', px, py-24);
+    if(!document.activeElement || document.activeElement !== lam){ if(!hover) lam.value = Math.round(625 + 200*Math.sin(t*0.35)); }
+  });
+})();
+
+/* RAG */
+(function(){
+  const docs = [
+    ["Education","I'm an MS Electrical Engineering student at San José State University, started Fall 2026, focused on FPGAs, SoCs, embedded AI and perception."],
+    ["CaprusIT","Before SJSU I spent over three years as an AI and ML developer at CaprusIT, building production AI for Menthra (LLM and RAG wellness), Aauti (computer vision and avatar video) and EmpowerMX (BERT, clustering and recommendation models for aviation maintenance), and I mentored interns and freshers."],
+    ["Continental","I interned at Continental in the ADAS business unit, developing and testing camera calibration algorithms in Python."],
+    ["IISc","At IISc Bangalore I earned a deep learning certification and did a thesis on monocular depth estimation."],
+    ["MTech","My MTech in Data Science is from Jain University, AICTE funded, where I was the gold medalist. My thesis was on hyperspectral image reconstruction."],
+    ["BTech","I did my BTech in Electrical and Electronics Engineering at GVPCE(A), where I was NSS coordinator for 100+ volunteers, an IEEE student body executive, and in Rotaract."],
+    ["Paper","I published a paper on real-time object detection."],
+    ["Hackathon","At the 2026 Embedded World North America Edge AI Hackathon I led my team to runner-up in the Sustainability track, building a machine-vision waste sorter on an Arduino Uno Q board."],
+    ["Hardware","Hardware I've built: a waste-sorting vision system on Arduino Uno Q, the Cardy Heart wearable on a Raspberry Pi, a barrel shifter for our team's SystemVerilog CORDIC engine, and a depth network split across ARM and FPGA on a Zynq-7000. Next: custom PCBs."],
+    ["Internships","I'm looking for Summer 2027 internships in FPGA, hardware, embedded systems, perception and edge AI."],
+    ["Life","Outside work I love aviation, space and astronomy, cooking and baking, arts and crafts, playing tennis and badminton, and watching almost any sport, especially multi-sport events, from chess to cricket. I speak English, Telugu and Hindi."],
+    ["Goal","Long term I want to be an ML hardware architect: designing the chips and accelerators that AI runs on."]
+  ];
+  const stop = new Set('a an the is are was what who where how does do did she her i my me you your of to in on at for and or with has have about any which tell'.split(' '));
+  const syn = {job:'internship',jobs:'internship',work:'caprusit',school:'education',study:'education',studying:'education',degree:'education',college:'btech',hobby:'life',hobbies:'life',fun:'life',languages:'speak',language:'speak',built:'hardware',build:'hardware',fpga:'fpga',award:'gold',awards:'gold',won:'runner',hackathons:'hackathon',llm:'llm',goals:'goal',future:'goal',plane:'aviation'};
+  const tok = s=>s.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w && !stop.has(w)).map(w=>syn[w]||w).map(w=>w.length>4 && w.endsWith('s') ? w.slice(0,-1) : w);
+  const dT = docs.map(d=>tok(d[0]+' '+d[1]));
+  const df = {}; dT.forEach(ts=>new Set(ts).forEach(w=>df[w]=(df[w]||0)+1));
+  const hits = $('#hits'), ans = $('#ans'), inp = $('#ragIn');
+  let typing = 0;
+  function ask(q){
+    const qt = tok(q); if(!qt.length) return;
+    const sc = dT.map((ts,i)=>{ let s = 0; qt.forEach(w=>{ const tf = ts.filter(z=>z===w || (w.length>3 && z.startsWith(w))).length; if(tf) s += (1+Math.log(tf))*Math.log(1+docs.length/(df[w]||1)); }); return [i,s]; }).sort((a,b)=>b[1]-a[1]);
+    const max = sc[0][1] || 1; hits.innerHTML = '';
+    sc.slice(0,4).forEach(([i,s],k)=>{ const d = document.createElement('div'); d.className = 'hit' + (k===0 && s>0 ? ' top':''); d.innerHTML = `<em>${s.toFixed(2)}</em><b>${docs[i][0]}</b> · ${docs[i][1].slice(0,90)}…<i style="width:0"></i>`; hits.appendChild(d); requestAnimationFrame(()=>requestAnimationFrame(()=>d.querySelector('i').style.width = (s/max*100)+'%')); });
+    const text = sc[0][1]>0 ? docs[sc[0][0]][1] : "I don't have a fact on that yet. Try asking about my work, hardware, education or internships.";
+    clearInterval(typing); ans.textContent = ''; let n = 0;
+    typing = setInterval(()=>{ n += 2; ans.textContent = text.slice(0,n); if(n>=text.length) clearInterval(typing); }, reduce?0:18);
+  }
+  ['What hardware has she built?','Is she looking for internships?','What did she do at IISc?','Any awards?','What does she do for fun?'].forEach(q=>{ const b = document.createElement('button'); b.textContent = q; b.onclick = ()=>{ inp.value = q; ask(q); }; $('#presets').appendChild(b); });
+  $('#ragGo').onclick = ()=>ask(inp.value); inp.addEventListener('keydown', e=>{ if(e.key==='Enter') ask(inp.value); });
+})();
+
+/* waste sorter */
+(function(){
+  const c = $('#dWaste'), x = c.getContext('2d'), W = c.width, H = c.height;
+  const types = [
+    {n:'banana peel', cls:'COMPOST', col:'#e8c547'}, {n:'aluminum can', cls:'RECYCLE', col:'#b9c0c7'},
+    {n:'chip wrapper', cls:'TRASH', col:'#9b5fb5'}, {n:'apple core', cls:'COMPOST', col:'#c0392b'},
+    {n:'plastic bottle', cls:'RECYCLE', col:'#6fb3d9'}, {n:'used napkin', cls:'TRASH', col:'#e9e4d8'}
+  ];
+  const clsCol = {COMPOST:'#7bd389', RECYCLE:'#6fb3d9', TRASH:'#e86a50'};
+  const items = []; let last = -10, ti = 0, oled = {txt:'READY', cls:null, conf:0, t:0};
+  const camX = W*0.45, beltY = H*0.62;
+  function drawItem(it){
+    const {n,col} = it.type; x.save(); x.translate(it.x, beltY-14); x.fillStyle = col;
+    if(n==='banana peel'){ x.beginPath(); x.arc(0,0,22,0.2,Math.PI-0.2); x.lineWidth = 10; x.strokeStyle = col; x.stroke(); }
+    else if(n==='aluminum can'){ x.fillRect(-12,-30,24,36); x.fillStyle = '#b5532a'; x.fillRect(-12,-18,24,10); }
+    else if(n==='chip wrapper'){ x.beginPath(); x.moveTo(-22,-14); for(let k=0;k<6;k++) x.lineTo(-22+k*9, k%2?-20:-12); x.lineTo(22,6); x.lineTo(-22,6); x.fill(); }
+    else if(n==='apple core'){ x.beginPath(); x.ellipse(0,-10,9,16,0,0,7); x.fill(); x.fillStyle = '#f5eddd'; x.fillRect(-4,-20,8,20); }
+    else if(n==='plastic bottle'){ x.globalAlpha = .85; x.fillRect(-10,-36,20,42); x.fillRect(-5,-44,10,8); x.globalAlpha = 1; }
+    else { x.beginPath(); x.ellipse(0,-6,20,12,0.3,0,7); x.fill(); }
+    x.restore();
+  }
+  whenVisible(c, t=>{
+    if(t-last > 1.7){ items.push({x:-40, type:types[ti++%types.length], seen:false, drop:0}); last = t; }
+    x.fillStyle = '#141a16'; x.fillRect(0,0,W,H);
+    // belt
+    x.fillStyle = '#262c28'; x.fillRect(0,beltY,W*0.82,30);
+    x.strokeStyle = '#3a423c'; x.lineWidth = 2; for(let k=0;k<30;k++){ const bx = ((k*34 + t*90)%(W*0.82)); x.beginPath(); x.moveTo(bx,beltY); x.lineTo(bx,beltY+30); x.stroke(); }
+    x.fillStyle = '#1b201c'; x.beginPath(); x.arc(14,beltY+15,15,0,7); x.arc(W*0.82-14,beltY+15,15,0,7); x.fill();
+    // camera + fov
+    x.fillStyle = 'rgba(240,207,122,.07)'; x.beginPath(); x.moveTo(camX,70); x.lineTo(camX-60,beltY); x.lineTo(camX+60,beltY); x.fill();
+    x.fillStyle = '#2c3530'; x.fillRect(camX-26,40,52,32); x.fillStyle = '#0b0b0d'; x.beginPath(); x.arc(camX,72,10,0,7); x.fill();
+    x.fillStyle = '#7bd389'; x.beginPath(); x.arc(camX+18,48,3,0,7); x.fill();
+    x.fillStyle = '#8f8676'; x.font = '500 11px JetBrains Mono'; x.textAlign = 'center'; x.fillText('Arduino Uno Q · cam', camX, 30);
+    // bins
+    ['COMPOST','RECYCLE','TRASH'].forEach((b,k)=>{ const bx = W*0.84, by = 120+k*95; x.fillStyle = clsCol[b]; x.globalAlpha = oled.cls===b ? 1 : .35; x.fillRect(bx, by, 100, 70); x.globalAlpha = 1; x.fillStyle = '#111613'; x.font = '600 12px JetBrains Mono'; x.fillText(b, bx+50, by+40); });
+    // items
+    for(let i=items.length-1;i>=0;i--){ const it = items[i]; it.x += 90*0.016;
+      if(!it.seen && Math.abs(it.x-camX)<6){ it.seen = true; oled = {txt:it.type.n, cls:it.type.cls, conf:0.86+Math.random()*0.12, t}; }
+      if(it.x > W*0.82){ items.splice(i,1); continue; } drawItem(it);
+      if(Math.abs(it.x-camX)<60){ x.strokeStyle = '#f0cf7a'; x.lineWidth = 2; x.strokeRect(it.x-30, beltY-60, 60, 56); } }
+    // oled
+    const ox = 30, oy = 40, ow = 250, oh = 110;
+    x.fillStyle = '#05070a'; x.fillRect(ox,oy,ow,oh); x.strokeStyle = '#2c3530'; x.lineWidth = 6; x.strokeRect(ox,oy,ow,oh);
+    x.textAlign = 'left'; x.fillStyle = '#9fe8ff'; x.font = '500 12px JetBrains Mono'; x.fillText('OLED 128x64', ox+14, oy+22);
+    if(oled.cls){ x.font = '600 26px JetBrains Mono'; x.fillStyle = clsCol[oled.cls]; x.fillText(oled.cls, ox+14, oy+60); x.font = '500 12px JetBrains Mono'; x.fillStyle = '#9fe8ff'; x.fillText(`${oled.txt} · ${(oled.conf*100).toFixed(0)}%`, ox+14, oy+86); }
+    else { x.font = '600 26px JetBrains Mono'; x.fillStyle = '#9fe8ff'; x.fillText('READY', ox+14, oy+60); }
+  });
+})();
+
+/* CORDIC */
+(function(){
+  const c = $('#dCordic'), x = c.getContext('2d'), W = c.width, H = c.height, ang = $('#ang'), angV = $('#angV'), tab = $('#ctab');
+  const N = 10; let steps = [], t0 = 0;
+  function compute(){
+    const th = (+ang.value)*Math.PI/180; let X = 0.607252935, Y = 0, Z = th; steps = [{i:'-',d:'',x:X,y:Y,z:Z}];
+    for(let i=0;i<N;i++){ const d = Z>=0?1:-1, f = Math.pow(2,-i); const nx = X - d*Y*f, ny = Y + d*X*f; Z -= d*Math.atan(f); X = nx; Y = ny; steps.push({i, d:d>0?'+':'−', x:X, y:Y, z:Z}); }
+    angV.textContent = ang.value+'°'; t0 = performance.now();
+  }
+  ang.addEventListener('input', compute); $('#cPlay').onclick = compute; compute();
+  whenVisible(c, ()=>{
+    const el = (performance.now()-t0)/1000, cur = Math.min(steps.length-1, Math.floor(el/0.55));
+    if(el > steps.length*0.55 + 2.5) t0 = performance.now();
+    x.fillStyle = '#0b100d'; x.fillRect(0,0,W,H);
+    const ox = W*0.33, oy = H*0.52, R = H*0.4;
+    x.strokeStyle = 'rgba(212,168,75,.15)'; x.lineWidth = 1; x.beginPath(); x.moveTo(ox-R-20,oy); x.lineTo(ox+R+20,oy); x.moveTo(ox,oy-R-20); x.lineTo(ox,oy+R+20); x.stroke();
+    x.strokeStyle = 'rgba(212,168,75,.35)'; x.beginPath(); x.arc(ox,oy,R,0,7); x.stroke();
+    const th = (+ang.value)*Math.PI/180; x.strokeStyle = 'rgba(123,211,137,.6)'; x.setLineDash([5,5]); x.beginPath(); x.moveTo(ox,oy); x.lineTo(ox+Math.cos(th)*R, oy-Math.sin(th)*R); x.stroke(); x.setLineDash([]);
+    for(let k=0;k<=cur;k++){ const s = steps[k], mag = Math.hypot(s.x,s.y), a = Math.atan2(s.y,s.x);
+      const px = ox + Math.cos(a)*R, py = oy - Math.sin(a)*R; const last = k===cur;
+      x.strokeStyle = last ? '#f0cf7a' : `rgba(212,168,75,${0.15+0.5*k/steps.length})`; x.lineWidth = last?3:1.5;
+      x.beginPath(); x.moveTo(ox,oy); x.lineTo(px,py); x.stroke(); x.fillStyle = x.strokeStyle; x.beginPath(); x.arc(px,py,last?5:3,0,7); x.fill(); }
+    const s = steps[cur]; x.textAlign = 'left'; x.font = '500 13px JetBrains Mono'; const tx = W*0.66;
+    x.fillStyle = '#d4a84b'; x.fillText(cur===0 ? 'start: x = 1/K, y = 0' : `iteration ${s.i}: shift by 2^-${s.i}`, tx, 60);
+    x.fillStyle = '#cfc5b0';
+    x.fillText(`cos θ ≈ ${s.x.toFixed(5)}`, tx, 100); x.fillText(`sin θ ≈ ${s.y.toFixed(5)}`, tx, 124);
+    x.fillStyle = '#8f8676'; x.fillText(`true  ${Math.cos(th).toFixed(5)}`, tx, 158); x.fillText(`true  ${Math.sin(th).toFixed(5)}`, tx, 182);
+    x.fillStyle = '#7bd389'; x.fillText(`angle left: ${(s.z*180/Math.PI).toFixed(3)}°`, tx, 222);
+    x.fillStyle = '#8f8676'; x.font = '400 11.5px JetBrains Mono'; x.fillText('only shifts and adds,', tx, 270); x.fillText('no multipliers', tx, 288);
+    let html = '<tr><th>i</th><th>dir</th><th>x</th><th>y</th><th>angle left</th></tr>';
+    steps.forEach((r,k)=>{ if(k===0) return; html += `<tr class="${k===cur?'on':''}"><td>${r.i}</td><td>${r.d}</td><td>${r.x.toFixed(4)}</td><td>${r.y.toFixed(4)}</td><td>${(r.z*180/Math.PI).toFixed(2)}°</td></tr>`; });
+    if(tab._last !== cur+'|'+ang.value){ tab.innerHTML = html; tab._last = cur+'|'+ang.value; }
+  });
+})();
+
+/* ECG */
+(function(){
+  const c = $('#dEcg'), x = c.getContext('2d'), W = c.width, H = c.height;
+  const beat = p=>{ const g = (m,s,a)=>a*Math.exp(-Math.pow((p-m)/s,2)); return g(.18,.025,.12)+g(.36,.008,-.12)+g(.4,.012,1)+g(.44,.01,-.25)+g(.66,.05,.28); };
+  whenVisible(c, t=>{
+    x.fillStyle = '#0b100d'; x.fillRect(0,0,W,H);
+    x.strokeStyle = 'rgba(181,83,42,.12)'; x.lineWidth = 1; for(let gx=0;gx<W;gx+=24){ x.beginPath(); x.moveTo(gx,0); x.lineTo(gx,H); x.stroke(); } for(let gy=0;gy<H;gy+=24){ x.beginPath(); x.moveTo(0,gy); x.lineTo(W,gy); x.stroke(); }
+    const bpm = 72 + 4*Math.sin(t*0.3), period = 60/bpm, pxs = 160, head = (t*pxs)%W;
+    x.strokeStyle = '#e86a50'; x.lineWidth = 2.2; x.beginPath();
+    for(let px=0; px<W; px+=2){ const age = ((head - px)+W)%W; if(age > W-40) { x.moveTo(px, H*0.62); continue; } const tt = t - age/pxs; const ph = ((tt%period)+period)%period/period; const y = H*0.62 - beat(ph)*H*0.5; x.lineTo(px,y); }
+    x.stroke();
+    x.fillStyle = '#e86a50'; x.font = '600 28px JetBrains Mono'; x.textAlign = 'right'; x.fillText(Math.round(bpm)+' bpm', W-20, 78);
+    const ph = ((t%period)+period)%period/period; x.font = '30px serif'; x.globalAlpha = ph>0.38&&ph<0.5?1:.5; x.fillText('♥', W-20, 116); x.globalAlpha = 1;
+  });
+})();
+
+/* koluvu steps: hidden for now, uncomment together with the HTML block
+(function(){
+  const c = $('#dKol'), x = c.getContext('2d'), W = c.width, H = c.height; let hx = -1;
+  c.addEventListener('pointermove', e=>{ const r = c.getBoundingClientRect(); hx = (e.clientX-r.left)/r.width*W; }); c.addEventListener('pointerleave', ()=>hx=-1);
+  const dollCols = ['#b5532a','#d89b2b','#8e2b22','#1f5a45','#f0cf7a','#c06a8a'];
+  whenVisible(c, t=>{
+    x.fillStyle = '#140f0c'; x.fillRect(0,0,W,H);
+    const steps = 5, sw = W*0.8, x0 = W*0.1, base = H-30, sh = 52;
+    for(let s=0;s<steps;s++){
+      const w = sw - s*sw*0.14, sx = x0 + (sw-w)/2, sy = base - (s+1)*sh;
+      x.fillStyle = s%2 ? '#8e2b22' : '#b5532a'; x.fillRect(sx, sy, w, sh);
+      x.fillStyle = '#d4a84b'; x.fillRect(sx, sy, w, 4);
+      const n = 7 - s; for(let d=0; d<n; d++){
+        const dx = sx + (d+0.5)*w/n, near = hx>0 ? Math.max(0, 1-Math.abs(hx-dx)/70) : 0;
+        const bob = near*8*Math.abs(Math.sin(t*6+d));
+        x.fillStyle = dollCols[(d+s)%dollCols.length];
+        x.beginPath(); x.moveTo(dx-12, sy); x.lineTo(dx+12, sy); x.lineTo(dx+6, sy-26-bob); x.lineTo(dx-6, sy-26-bob); x.fill();
+        x.fillStyle = '#e8c9a0'; x.beginPath(); x.arc(dx, sy-32-bob, 7, 0, 7); x.fill();
+        if(near>0.2){ x.fillStyle = `rgba(255,214,120,${near*0.6})`; x.beginPath(); x.arc(dx, sy-32-bob, 18, 0, 7); x.fill(); }
+      }
+    }
+    for(let k=0;k<14;k++){ const lx = 40 + k*48, ly = 30 + 8*Math.sin(k); x.strokeStyle = 'rgba(212,168,75,.3)'; x.beginPath(); x.moveTo(lx-48, 26); x.quadraticCurveTo(lx-24, 40, lx, ly); x.stroke();
+      const on = 0.5+0.5*Math.sin(t*3 + k); x.fillStyle = `rgba(255,${180+on*60},90,${0.4+on*0.6})`; x.beginPath(); x.arc(lx, ly, 4, 0, 7); x.fill(); }
+    x.fillStyle = '#d4a84b'; x.font = 'italic 300 22px Fraunces, serif'; x.textAlign = 'center'; x.fillText('సంక్రాంతి · Sankranthi 2027', W/2, H-6);
+  });
+})();
+end koluvu steps */
+
+/* journey trace */
+(function(){
+  const path = $('#path'), fill = $('#traceFill'), stops = [...path.querySelectorAll('.stop')];
+  function upd(){ const r = path.getBoundingClientRect(), mid = innerHeight*0.6; const p = Math.max(0, Math.min(1, (mid - r.top)/r.height)); fill.style.height = (p*100)+'%';
+    stops.forEach(s=>{ const sr = s.getBoundingClientRect(); s.classList.toggle('lit', sr.top < mid); }); }
+  addEventListener('scroll', upd, {passive:true}); upd();
+})();
+
+/* notes */
+(function(){
+  const posts = [
+    {date:'Nov 2026', tag:'Hackathons', title:'Runner-up without a servo', excerpt:'Two days, an Arduino Uno Q, a conveyor belt and a problem we only learned that morning.', body:[
+      'At the Embedded World North America Edge AI Hackathon, the challenges were handed out on the morning of day one. Ours: sort waste into compost, recycling or trash with machine vision, and flash the answer on an OLED.',
+      'We had a conveyor belt with a DC motor and no servo, so nothing could physically push an item into a bin. That constraint shaped everything. We focused on getting the classification right and making the decision obvious on the display.',
+      'My main lesson from leading the team was to decide early. With two days, the hardest part was not the model, it was saying no to good ideas we did not have time for.',
+      'We finished second in the Sustainability track. The next version gets an actuator.']},
+    {date:'Nov 2026', tag:'Career', title:'From LLMs to logic gates', excerpt:'Why I left three years of building language model systems to learn hardware.', body:[
+      'For three years I built retrieval-augmented LLM systems. I learned how to make models useful. I did not learn what they cost to run, or where they actually run.',
+      'The more I worked with models, the more I wanted to understand the layer under them: the memory, the data movement, the silicon. Most of the cost of AI lives there.',
+      'So I came to San José State for an MSEE. Now I write SystemVerilog, read timing reports, and think about where every byte lives. It is slower, and I love it.']},
+    {date:'Coming soon', tag:'FPGA', title:'What a barrel shifter taught me about parameters', excerpt:'Notes from my first parameterized RTL module.', soon:true}
+  ];
+  const wrap = $('#posts'), modal = $('#modal');
+  posts.forEach(p=>{ const b = document.createElement(p.soon?'div':'button'); b.className = 'post rv' + (p.soon?' soon':''); b.innerHTML = `<div class="meta">${p.date} · ${p.tag}</div><h3>${p.title}</h3><p>${p.excerpt}</p><div class="more">${p.soon?'drafting…':'Read →'}</div>`;
+    if(!p.soon) b.onclick = ()=>{ $('#mMeta').textContent = p.date+' · '+p.tag; $('#mTitle').textContent = p.title; $('#mBody').innerHTML = p.body.map(t=>`<p>${t}</p>`).join(''); modal.classList.add('on'); document.body.style.overflow = 'hidden'; };
+    wrap.appendChild(b); rvIO.observe(b); });
+  const close = ()=>{ modal.classList.remove('on'); document.body.style.overflow = ''; };
+  $('#mx').onclick = close; modal.addEventListener('click', e=>{ if(e.target===modal) close(); }); addEventListener('keydown', e=>{ if(e.key==='Escape') close(); });
+})();
+
+/* project read-more pages */
+(function(){
+  const P = {
+    depth:{meta:'IISc Bangalore · Sep to Nov 2023',title:'Monocular depth estimation',lead:'Recovering depth from a single camera image, the kind of perception that lets a cheap sensor understand distance.',stats:[['85.81%','test accuracy'],['85%','published benchmark']],secs:[['What I built',['A U-Net with a DenseNet-201 encoder for single-image depth estimation','Trained and evaluated it against a published benchmark, and beat it']],['What happened next',['At SJSU I am quantizing this network and splitting it across the ARM cores and FPGA fabric of a Zynq-7000 (Zybo Z7)','A streaming convolution kernel in Vitis HLS, with AXI and DMA data movement between the two sides','Pass/fail criteria against a floating-point reference, and a planned INT8 vs INT16 comparison of depth error, latency, power and resources']]],stack:['U-Net','DenseNet-201','Computer vision','Vitis HLS','Zynq-7000']},
+    detect:{meta:'Published paper',title:'Real-time object detection',lead:'Research on detecting objects fast enough to act on, where latency matters as much as accuracy.',secs:[['Why it matters',['On a car, a robot or a camera, a detection that arrives late is a detection that missed','The confidence threshold is where you trade false alarms against missed objects, which is what the demo lets you feel']]],stack:['Object detection','Computer vision','Real-time systems'],note:'Paper title, venue and link coming soon.'},
+    hyper:{meta:'MTech thesis · Jain University · Gold Medalist',title:'Hyperspectral image reconstruction',lead:'Reconstructing images across many narrow spectral bands, far beyond the red, green and blue a normal camera sees.',secs:[['Why it matters',['Hyperspectral data reveals material properties invisible to the eye, with uses from agriculture to medical imaging','Reconstructing it computationally makes that information cheaper to capture']],['Recognition',['Gold Medalist in an AICTE-funded MTech in Data Science']]],stack:['Spectral imaging','Deep learning','Reconstruction'],note:'More detail coming soon.'},
+    caprus:{meta:'CaprusIT · AI & ML Developer · Mar 2023 to May 2026 · Hyderabad',title:'Production AI at CaprusIT',lead:'I designed and deployed production AI across mental wellness, AI-driven media and aviation, and mentored the interns and freshers who joined us.',secs:[['Menthra · AI mental wellness',['LLM-based therapy chat with RAG personalisation','NLP modules for emotion analysis and intent detection','Talking avatars via HeyGen, text-to-speech via ElevenLabs, speech-to-text via Whisper','Deployed on Azure']],['Aauti · AI avatar marketplace',['The avatar video generation pipeline, using computer vision and HeyGen','Voice cloning R&D with Wav2Lip lip-sync','A modular microservice architecture']],['EmpowerMX · aviation maintenance (MRO)',['ML pipelines using BERT embeddings for maintenance records','Clustering, classification and recommendation models','Production inference on AWS SageMaker, ECS, S3 and EventBridge']],['Mentoring',['Trained interns and freshers on ML pipelines, backend systems and production workflows']]],stack:['Python','PyTorch','TensorFlow','FastAPI','LangChain','Azure','AWS','Docker']},
+    waste:{meta:'Embedded World North America · Anaheim · Sep 2026',title:'Machine-vision waste sorter',lead:'I led a team of four to runner-up in the ASUS-sponsored Sustainability Challenge: a vision system that sorts waste on a conveyor, built in two days.',stats:[['2nd','of 12 teams'],['83.3%','test accuracy'],['7','material classes'],['2 days','to build']],secs:[['What we built',['A MobileNetV3-Small classifier deployed through ONNX Runtime on the Qualcomm QRB2210-based Arduino UNO Q','Seven material classes, routed to compost, recycling or trash','Trained on RealWaste and TrashNet, mixed with our own validation data','Linux-side Python inference integrated with the STM32U585 firmware','An OLED display driver ported to the board\'s Zephyr-based core, so every decision shows on screen']],['The constraint',['The conveyor had a DC motor but no servo, so nothing could push an item into a bin. We put everything into getting the classification right and making the call obvious on the display','Next version: an actuator']]],stack:['MobileNetV3','ONNX Runtime','Arduino UNO Q','App Lab','STM32U585','Zephyr','Python']},
+    cordic:{meta:'SJSU EE 271 · team of four · Sep 2026 to now',title:'Pipelined fixed-point CORDIC engine',lead:'A parameterized, pipelined CORDIC engine in SystemVerilog for field-oriented motor control. It turns stationary-frame components and rotor angle into motor-aligned d/q components using only shifts and adds.',secs:[['My piece',['The parameterized barrel shifter that performs every 2⁻ⁱ shift']],['The project',['Configurable word width and pipeline depth','Synthesis of several configurations to compare accuracy, latency, clock frequency and resource use','Verification with a self-checking testbench against a software reference model']],['Why it matters',['Motor controllers run these transforms continuously. CORDIC does trigonometry without multipliers: give up a little precision, win area, power and clock speed']]],stack:['SystemVerilog','Fixed-point','Pipelining','Verification']},
+    cardy:{meta:'GVP College of Engineering · BTech · Dec 2018 to Apr 2019',title:'Cardy Heart',lead:'A solar-powered biomedical wearable that tracks heart signals, pulse and motion, and alerts a phone when something looks wrong.',secs:[['What we built',['Integrated AD8232 ECG, pulse-rate and ADXL335 accelerometer sensors','Read them through an MCP3008 SPI ADC, with a 0.96-inch I²C OLED display','Ran it all on a solar-powered Raspberry Pi']],['My part',['Led the team of four','Wrote the acquisition firmware, the alerts and the Android communication']],['Next',['Taking it from prototype wiring to a custom PCB']]],stack:['Raspberry Pi','AD8232 ECG','ADXL335','MCP3008','SPI','I²C','Android']}
+  };
+  const esc = s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  document.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{
+    const d = P[b.dataset.rm]; if(!d) return;
+    $('#mMeta').textContent = d.meta; $('#mTitle').textContent = d.title;
+    let h = `<p>${esc(d.lead)}</p>`;
+    if(d.stats) h += `<div class="stats">${d.stats.map(s=>`<div><b>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join('')}</div>`;
+    d.secs.forEach(([t,items])=>{ h += `<h4>${esc(t)}</h4><ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`; });
+    h += `<h4>Tools</h4><div class="rchips">${d.stack.map(s=>`<span>${esc(s)}</span>`).join('')}</div>`;
+    if(d.note) h += `<p style="font-size:15px;color:var(--mute);font-style:italic;margin-top:20px">${esc(d.note)}</p>`;
+    $('#mBody').innerHTML = h; $('#modal').classList.add('on'); $('#modal').scrollTop = 0; document.body.style.overflow = 'hidden';
+  }));
+})();
+
+/* about: paper plane follows cursor with a trail */
+(function(){
+  const sec = $('#about'), plane = $('#plane'), tc = $('#trail'), x = tc.getContext('2d');
+  let tx = 0, ty = 0, px = 0, py = 0, inside = false; const trail = [];
+  function size(){ tc.width = sec.offsetWidth; tc.height = sec.offsetHeight; }
+  addEventListener('resize', size); size();
+  sec.addEventListener('pointermove', e=>{ const r = sec.getBoundingClientRect(); tx = e.clientX-r.left; ty = e.clientY-r.top; if(!inside){ px = tx-60; py = ty+40; } inside = true; plane.style.opacity = 1; });
+  sec.addEventListener('pointerleave', ()=>{ inside = false; plane.style.opacity = 0; });
+  whenVisible(sec, ()=>{
+    if(tc.width !== sec.offsetWidth || tc.height !== sec.offsetHeight) size();
+    const dx = tx-px, dy = ty-py; px += dx*0.08; py += dy*0.08;
+    const a = Math.atan2(dy, dx) + Math.PI/4.6;
+    plane.style.transform = `translate(${px-17}px,${py-17}px) rotate(${a}rad)`;
+    if(inside) trail.push([px,py]); if(trail.length>60 || (!inside && trail.length)) trail.shift();
+    x.clearRect(0,0,tc.width,tc.height); x.setLineDash([4,6]); x.strokeStyle = 'rgba(181,83,42,.45)'; x.lineWidth = 1.5; x.beginPath(); trail.forEach((p,k)=>k?x.lineTo(...p):x.moveTo(...p)); x.stroke();
+  });
+})();
+</script>
+</body>
+</html>
