@@ -294,6 +294,25 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
   .reader{padding:34px 24px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rv{opacity:1;transform:none}}
+/* demo badge moves under the label on phones (set from the script) */
+.illu.tl{top:52px;left:24px;right:auto}
+.reader .stats b.long{font-size:21px;line-height:28px;white-space:nowrap}
+/* phones only */
+@media(max-width:600px){
+  .dbar input[type=range]{min-width:0}
+  .cue{display:none}
+  .reader .meta{padding-right:40px}
+  .likes{grid-template-columns:1fr}
+}
+/* narrow desktop windows: same two-column cards, text no longer collides */
+@media(min-width:901px) and (max-width:1240px){
+  .recipe b{white-space:normal!important}
+  .recipe small,.recipe li{white-space:nowrap}
+  .t-cup{width:36px!important}
+  .t-bowl{width:66px!important}
+  .score small{display:block;padding-right:48px}
+  .score .board span{white-space:nowrap}
+}
 </style>
 </head>
 <body>
@@ -476,9 +495,9 @@ footer{background:var(--die);color:#6f6a60;font-family:var(--mono);font-size:11p
     <div class="stop"><div class="when">Now</div><h4>MS Electrical Engineering · San José State</h4><p>Digital design, SoCs and FPGAs, with a focus on running AI efficiently on small devices.</p></div>
     <div class="stop"><div class="when">Sep 2026</div><h4>Runner-up · Embedded World NA Edge AI Hackathon</h4><p>Led a four-person team to second place in the Sustainability track.</p></div>
     <div class="stop"><div class="when">Mar 2023 → May 2026</div><h4>AI &amp; ML Developer · CaprusIT</h4><p>Production AI for Menthra (LLM + RAG wellness), Aauti (vision and avatar video) and EmpowerMX (aviation maintenance ML). Mentored interns and freshers.</p></div>
+    <div class="stop"><div class="when">Nov 2023</div><h4>Advanced Certification in Deep Learning · IISc Bangalore</h4><p>Thesis on monocular depth estimation.</p></div>
     <div class="stop"><div class="when">Mar 2022 → Feb 2023</div><h4>Software Developer · Votivesoft</h4><p>Web applications for e-Governance systems on the LAMP stack.</p></div>
     <div class="stop"><div class="when">Gold medal</div><h4>MTech Data Science · Jain University</h4><p>AICTE-funded. Thesis on hyperspectral image reconstruction.</p></div>
-    <div class="stop"><div class="when">Nov 2023</div><h4>Advanced Certification in Deep Learning · IISc Bangalore</h4><p>Thesis on monocular depth estimation.</p></div>
     <div class="stop"><div class="when">Dec 2020 → Jun 2021</div><h4>ADAS Engineering Intern · Continental</h4><p>Python development and testing of camera calibration algorithms in the ADAS business unit.</p></div>
     <div class="stop"><div class="when">Where it started</div><h4>BTech EEE · GVPCE(A)</h4><p>NSS Coordinator for 100+ volunteers, IEEE student body executive, Rotaract, cultural club treasurer.</p></div>
   </div>
@@ -675,15 +694,17 @@ function whenVisible(el, fn){
 
   const ndc = new THREE.Vector2(); addEventListener('pointermove', e=>{ ndc.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1); }, {passive:true});
   const hero = $('#top'), heroText = $('#heroText'), fade = $('#fade');
-  function resize(){ renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+  let vw = 0, vh = 0;
+  function resize(){ if(!innerWidth || !innerHeight) return; vw = innerWidth; vh = innerHeight; renderer.setSize(vw, vh, false); camera.aspect = vw/vh; camera.updateProjectionMatrix(); }
   addEventListener('resize', resize); resize();
   const A = {p:new THREE.Vector3(-1.5,10.5,12.8), t:new THREE.Vector3(-4.2,0,0.4)}, B = {p:new THREE.Vector3(0,3.2,0.25), t:new THREE.Vector3(0,0,0)};
   const cp = A.p.clone(), ct = A.t.clone(), wp = new THREE.Vector3(), wt = new THREE.Vector3();
   let prev = performance.now();
   function frame(now){
     const dt = Math.min(.05,(now-prev)/1000); prev = now;
-    const h = hero.offsetHeight - innerHeight, p = Math.min(1, Math.max(0, scrollY/h));
-    if(scrollY < hero.offsetHeight + 50){
+    if(innerWidth !== vw || innerHeight !== vh) resize();
+    const h = hero.offsetHeight - innerHeight, p = h > 0 ? Math.min(1, Math.max(0, scrollY/h)) : 0;
+    if(vw && vh && scrollY < hero.offsetHeight + 50){
       const e = p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2;
       const far = camera.aspect < 0.9 ? 1.6 : 1;
       wp.lerpVectors(A.p, B.p, e); wt.lerpVectors(A.t, B.t, e);
@@ -729,6 +750,8 @@ function whenVisible(el, fn){
 })();
 
 /* ================= demos ================= */
+/* Phones (600px wide or less) draw the demos with larger labels and thicker lines, because the canvas is shown at under half size there. Wider screens take the original path. */
+const phoneMQ = matchMedia('(max-width:600px)');
 const inferno = [[0,[252,255,164]],[0.25,[249,142,9]],[0.5,[188,55,84]],[0.75,[87,16,110]],[1,[10,4,30]]];
 function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i++){ if(d<=inferno[i][0]){ const a = inferno[i-1], b = inferno[i], t = (d-a[0])/(b[0]-a[0]); return `rgb(${a[1].map((v,k)=>Math.round(v+(b[1][k]-v)*t)).join(',')})`; } } return 'rgb(10,4,30)'; }
 
@@ -769,8 +792,9 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
     if(!drag) split = W*(0.5+0.32*Math.sin(t*0.6));
     x.save(); scene('rgb', t); x.restore();
     x.save(); x.beginPath(); x.rect(split,0,W-split,H); x.clip(); scene('depth', t); x.restore();
-    x.fillStyle = '#f0cf7a'; x.fillRect(split-1.5,0,3,H);
-    x.beginPath(); x.arc(split,H/2,14,0,7); x.fill(); x.fillStyle = '#111613'; x.font = '600 14px JetBrains Mono'; x.textAlign = 'center'; x.fillText('⟷', split, H/2+5);
+    const sm = phoneMQ.matches;
+    x.fillStyle = '#f0cf7a'; x.fillRect(split-(sm?2.5:1.5),0,sm?5:3,H);
+    x.beginPath(); x.arc(split,H/2,sm?24:14,0,7); x.fill(); x.fillStyle = '#111613'; x.font = `600 ${sm?24:14}px JetBrains Mono`; x.textAlign = 'center'; x.fillText('⟷', split, H/2+(sm?8:5));
   });
 })();
 
@@ -783,6 +807,7 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
   const objs = []; for(let i=0;i<8;i++){ const k = kinds[i%4]; objs.push({k, x:r()*W, y:H*0.45+r()*H*0.45, vx:(r()-.5)*60*(k.n==='car'?2.4:1), conf:0.55+r()*0.42}); }
   whenVisible(c, t=>{
     const th = +thr.value; thrV.textContent = th.toFixed(2);
+    const sm = phoneMQ.matches, f = sm ? 2 : 1;
     x.fillStyle = '#1a201c'; x.fillRect(0,0,W,H);
     x.fillStyle = '#232b25'; x.fillRect(0,H*0.42,W,H*0.58);
     x.strokeStyle = 'rgba(240,207,122,.12)'; x.setLineDash([18,14]); x.beginPath(); x.moveTo(0,H*0.72); x.lineTo(W,H*0.72); x.stroke(); x.setLineDash([]);
@@ -801,16 +826,19 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
       const cf = Math.max(0.05, Math.min(0.99, o.conf + 0.06*Math.sin(t*3+i)));
       dets.push({bx:bx-3+2*Math.sin(t*7+i), by:by-3, w:w+6, h:h+6, cf, n:k.n, real:true});
     });
-    for(let k=0;k<3;k++){ const cf = 0.12 + 0.22*(0.5+0.5*Math.sin(t*1.3+k*2)); dets.push({bx:80+k*230+30*Math.sin(t+k), by:H*0.2+k*20, w:50, h:44, cf, n:['person','bike','dog'][k], real:false}); }
+    for(let k=0;k<3;k++){ const cf = 0.12 + 0.22*(0.5+0.5*Math.sin(t*1.3+k*2)); dets.push({bx:80+k*230+30*Math.sin(t+k), by:H*0.2+k*20+(sm?30:0), w:50, h:44, cf, n:['person','bike','dog'][k], real:false}); }
     dets.forEach(d=>{
       if(d.cf < th){ if(d.real) missed++; return; }
       if(d.real) shown++; else fp++;
       const col = d.real ? '#f0cf7a' : '#e86a50';
-      x.strokeStyle = col; x.lineWidth = 2; x.strokeRect(d.bx, d.by, d.w, d.h);
-      const lab = `${d.n} ${d.cf.toFixed(2)}`; x.font = '500 12px JetBrains Mono'; const tw = x.measureText(lab).width + 8;
-      x.fillStyle = col; x.fillRect(d.bx, d.by-17, tw, 17); x.fillStyle = '#111613'; x.textAlign = 'left'; x.fillText(lab, d.bx+4, d.by-5);
+      x.strokeStyle = col; x.lineWidth = 2*f; x.strokeRect(d.bx, d.by, d.w, d.h);
+      const lab = `${d.n} ${d.cf.toFixed(2)}`; x.font = `500 ${12*f}px JetBrains Mono`; const tw = x.measureText(lab).width + 8*f;
+      const lx = sm ? Math.max(2, Math.min(W-tw-2, d.bx)) : d.bx;
+      x.fillStyle = col; x.fillRect(lx, d.by-17*f, tw, 17*f); x.fillStyle = '#111613'; x.textAlign = 'left'; x.fillText(lab, lx+4*f, d.by-5*f);
     });
-    x.fillStyle = 'rgba(11,16,13,.75)'; x.fillRect(W-148, H-34, 140, 26); x.fillStyle = '#7bd389'; x.font = '500 12px JetBrains Mono'; x.textAlign = 'left'; x.fillText(`● ${Math.round(29+Math.sin(t*2))} FPS`, W-138, H-16);
+    const fl = `● ${Math.round(29+Math.sin(t*2))} FPS`, bh = 26*f; let bw = 140;
+    if(sm){ x.font = '500 24px JetBrains Mono'; bw = x.measureText(fl).width + 40; }
+    x.fillStyle = 'rgba(11,16,13,.75)'; x.fillRect(W-8-bw, H-8-bh, bw, bh); x.fillStyle = '#7bd389'; x.font = `500 ${12*f}px JetBrains Mono`; x.textAlign = 'left'; x.fillText(fl, W-8-bw+10*f, H-8-bh+18*f);
     stat.textContent = `found ${shown}/8 · missed ${missed} · false ${fp}`;
   });
 })();
@@ -830,6 +858,7 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
   function wl(l){ let r=0,g=0,b=0; if(l<440){r=-(l-440)/40;b=1}else if(l<490){g=(l-440)/50;b=1}else if(l<510){g=1;b=-(l-510)/20}else if(l<580){r=(l-510)/70;g=1}else if(l<645){r=1;g=-(l-645)/65}else if(l<=700){r=1}else{ return [200,190,215]; } return [r*255,g*255,b*255]; }
   function shade(reg, l){ const v = R[reg](l), w = wl(l); const m = 0.18+0.82*v; return `rgb(${w.map(c=>Math.round(c*m*0.95+10)).join(',')})`; }
   let hover = null; c.addEventListener('pointermove', e=>{ const r = c.getBoundingClientRect(); hover = [(e.clientX-r.left)/r.width*W, (e.clientY-r.top)/r.height*H]; }); c.addEventListener('pointerleave', ()=>hover=null);
+  const illu = c.parentNode.querySelector('.illu'); let smWas = null;
   whenVisible(c, t=>{
     const l = +lam.value; lamV.textContent = l + ' nm' + (l>700?' · NIR':'');
     const IW = W*0.62;
@@ -841,16 +870,26 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
     x.fillStyle = shade('fruit',l); [[150,200],[270,160],[320,240],[200,280]].forEach(([a,b])=>{ x.beginPath(); x.arc(a,b,20,0,7); x.fill(); });
     x.fillStyle = shade('flower',l); [[60,370],[90,392],[380,380]].forEach(([a,b])=>{ x.beginPath(); x.arc(a,b,12,0,7); x.fill(); });
     // spectra panel
-    const px = IW+18, pw = W-IW-30, py = 40, ph = H-110;
+    const sm = phoneMQ.matches;
+    if(sm !== smWas){ smWas = sm; if(illu) illu.classList.toggle('tl', sm); }
+    const px = IW+18, pw = W-IW-30, py = sm ? 72 : 40, ph = sm ? H-180 : H-110, bx = px+(700-400)/450*pw;
     x.fillStyle = '#0b100d'; x.fillRect(IW,0,W-IW,H);
     x.strokeStyle = 'rgba(212,168,75,.25)'; x.strokeRect(px,py,pw,ph);
-    x.fillStyle = 'rgba(200,190,215,.06)'; x.fillRect(px+(700-400)/450*pw, py, (150)/450*pw, ph);
-    ['sky','leaf','fruit','soil'].forEach(reg=>{ x.strokeStyle = cols[reg]; x.lineWidth = 2; x.beginPath(); for(let L=400;L<=850;L+=5){ const X = px+(L-400)/450*pw, Y = py+ph-R[reg](L)*ph; L===400?x.moveTo(X,Y):x.lineTo(X,Y); } x.stroke(); });
-    const LX = px+(l-400)/450*pw; x.strokeStyle = '#f0cf7a'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(LX,py); x.lineTo(LX,py+ph); x.stroke();
-    x.font = '500 11px JetBrains Mono'; x.textAlign = 'left';
-    ['sky','leaf','fruit','soil'].forEach((reg,k)=>{ x.fillStyle = cols[reg]; x.fillRect(px+(k%2)*(pw/2), H-56+Math.floor(k/2)*18, 10, 10); x.fillStyle = '#cfc5b0'; x.fillText(reg, px+14+(k%2)*(pw/2), H-47+Math.floor(k/2)*18); });
-    x.fillStyle = '#8f8676'; x.fillText('400', px, py+ph+14); x.textAlign = 'right'; x.fillText('850 nm', px+pw, py+ph+14); x.textAlign = 'center'; x.fillText('visible | NIR', px+(700-400)/450*pw, py-8);
-    x.textAlign = 'left'; x.fillStyle = '#d4a84b'; x.fillText('reflectance', px, py-24);
+    x.fillStyle = 'rgba(200,190,215,.06)'; x.fillRect(bx, py, (150)/450*pw, ph);
+    ['sky','leaf','fruit','soil'].forEach(reg=>{ x.strokeStyle = cols[reg]; x.lineWidth = sm ? 3.5 : 2; x.beginPath(); for(let L=400;L<=850;L+=5){ const X = px+(L-400)/450*pw, Y = py+ph-R[reg](L)*ph; L===400?x.moveTo(X,Y):x.lineTo(X,Y); } x.stroke(); });
+    const LX = px+(l-400)/450*pw; x.strokeStyle = '#f0cf7a'; x.lineWidth = sm ? 3 : 1.5; x.beginPath(); x.moveTo(LX,py); x.lineTo(LX,py+ph); x.stroke();
+    if(sm){
+      x.font = '500 22px JetBrains Mono';
+      ['sky','leaf','fruit','soil'].forEach((reg,k)=>{ const gx = px+(k%2)*(pw/2), gy = py+ph+40+Math.floor(k/2)*30; x.fillStyle = cols[reg]; x.fillRect(gx, gy, 16, 16); x.fillStyle = '#cfc5b0'; x.textAlign = 'left'; x.fillText(reg, gx+24, gy+15); });
+      x.fillStyle = '#8f8676'; x.textAlign = 'left'; x.fillText('400', px, py+ph+26); x.textAlign = 'right'; x.fillText('850 nm', px+pw, py+ph+26);
+      x.fillText('visible', bx-8, py-10); x.textAlign = 'left'; x.fillStyle = '#b7aecb'; x.fillText('NIR', bx+8, py-10);
+      x.fillStyle = '#d4a84b'; x.fillText('reflectance', px, 34);
+    } else {
+      x.font = '500 11px JetBrains Mono'; x.textAlign = 'left';
+      ['sky','leaf','fruit','soil'].forEach((reg,k)=>{ x.fillStyle = cols[reg]; x.fillRect(px+(k%2)*(pw/2), H-56+Math.floor(k/2)*18, 10, 10); x.fillStyle = '#cfc5b0'; x.fillText(reg, px+14+(k%2)*(pw/2), H-47+Math.floor(k/2)*18); });
+      x.fillStyle = '#8f8676'; x.fillText('400', px, py+ph+14); x.textAlign = 'right'; x.fillText('850 nm', px+pw, py+ph+14); x.fillText('visible', bx-6, py+ph-8); x.textAlign = 'left'; x.fillStyle = '#b7aecb'; x.fillText('NIR', bx+6, py+ph-8);
+      x.textAlign = 'left'; x.fillStyle = '#d4a84b'; x.fillText('reflectance', px, py-24);
+    }
     if(!document.activeElement || document.activeElement !== lam){ if(!hover) lam.value = Math.round(625 + 200*Math.sin(t*0.35)); }
   });
 })();
@@ -860,19 +899,27 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
   const docs = [
     ["Education","I'm an MS Electrical Engineering student at San José State University, started Fall 2026, focused on FPGAs, SoCs, embedded AI and perception."],
     ["CaprusIT","Before SJSU I spent over three years as an AI and ML developer at CaprusIT, building production AI for Menthra (LLM and RAG wellness), Aauti (computer vision and avatar video) and EmpowerMX (BERT, clustering and recommendation models for aviation maintenance), and I mentored interns and freshers."],
+    ["Votivesoft","Before CaprusIT I was a software developer at Votivesoft, building web applications for e-Governance systems on the LAMP stack."],
     ["Continental","I interned at Continental in the ADAS business unit, developing and testing camera calibration algorithms in Python."],
     ["IISc","At IISc Bangalore I earned a deep learning certification and did a thesis on monocular depth estimation."],
     ["MTech","My MTech in Data Science is from Jain University, AICTE funded, where I was the gold medalist. My thesis was on hyperspectral image reconstruction."],
     ["BTech","I did my BTech in Electrical and Electronics Engineering at GVPCE(A), where I was NSS coordinator for 100+ volunteers, an IEEE student body executive, and in Rotaract."],
     ["Paper","I published a paper on real-time object detection."],
     ["Hackathon","At the 2026 Embedded World North America Edge AI Hackathon I led my team to runner-up in the Sustainability track, building a machine-vision waste sorter on an Arduino Uno Q board."],
+    ["FPGA and RTL","In digital design I write SystemVerilog RTL and build for FPGA with Vivado and Vitis HLS. On a Zybo Z7-10 (Zynq-7000) FPGA I built an INT8 FastDepth convolution kernel that runs 11.7x faster than ARM NEON, and I wrote the parameterized barrel shifter for our team's pipelined CORDIC engine in SystemVerilog."],
     ["Hardware","Hardware I've built: a waste-sorting vision system on Arduino Uno Q, the Cardy Heart wearable on a Raspberry Pi, a barrel shifter for our team's SystemVerilog CORDIC engine, and an INT8 FastDepth convolution kernel on a Zynq-7000 FPGA that runs 11.7x faster than ARM NEON. Next: custom PCBs."],
+    ["CORDIC","In EE 271 at SJSU our team of four is building a parameterized, pipelined fixed-point CORDIC engine in SystemVerilog for motor control. My piece is the parameterized barrel shifter."],
+    ["Cardy Heart","Cardy Heart was my BTech team project: a solar-powered biomedical wearable that read ECG, pulse and motion sensors on a Raspberry Pi and sent alerts to an Android app. I led the team of four."],
+    ["Leadership","I led a team of four to runner-up at the Embedded World North America Edge AI Hackathon, led the Cardy Heart team, coordinated 100+ NSS volunteers in college, and mentored interns and freshers at CaprusIT."],
+    ["Awards","Awards: Gold Medalist in my MTech in Data Science at Jain University, and runner-up in the Sustainability track of the 2026 Embedded World North America Edge AI Hackathon."],
     ["Internships","I'm looking for Summer 2027 internships in FPGA, hardware, embedded systems, perception and edge AI."],
+    ["Location","I'm based in Sunnyvale, California, in the San Francisco Bay Area."],
+    ["Contact","The best way to reach me is email or LinkedIn. Both are in the Contact section at the bottom of this page, next to my GitHub and résumé."],
     ["Life","Outside work I love aviation, space and astronomy, cooking and baking, arts and crafts, playing tennis and badminton, and watching almost any sport, especially multi-sport events, from chess to cricket. I speak English, Telugu and Hindi."],
     ["Goal","Long term I want to be an ML hardware architect: designing the chips and accelerators that AI runs on."]
   ];
   const stop = new Set('a an the is are was what who where how does do did she her i my me you your of to in on at for and or with has have about any which tell'.split(' '));
-  const syn = {job:'internship',jobs:'internship',work:'caprusit',school:'education',study:'education',studying:'education',degree:'education',college:'btech',hobby:'life',hobbies:'life',fun:'life',languages:'speak',language:'speak',built:'hardware',build:'hardware',fpga:'fpga',award:'gold',awards:'gold',won:'runner',hackathons:'hackathon',llm:'llm',goals:'goal',future:'goal',plane:'aviation'};
+  const syn = {job:'internship',jobs:'internship',work:'caprusit',school:'education',study:'education',studying:'education',degree:'education',college:'btech',hobby:'life',hobbies:'life',fun:'life',languages:'speak',language:'speak',built:'hardware',build:'hardware',fpga:'fpga',award:'award',awards:'award',prize:'award',prizes:'award',won:'award',win:'award',hackathons:'hackathon',llm:'llm',goals:'goal',future:'goal',plane:'aviation',verilog:'systemverilog',hdl:'rtl',email:'contact',mail:'contact',reach:'contact',based:'location',located:'location',live:'location',lives:'location',city:'location',lead:'leadership',leader:'leadership',led:'leadership',leading:'leadership',mentor:'mentored',mentoring:'mentored',mentorship:'mentored'};
   const tok = s=>s.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w && !stop.has(w)).map(w=>syn[w]||w).map(w=>w.length>4 && w.endsWith('s') ? w.slice(0,-1) : w);
   const dT = docs.map(d=>tok(d[0]+' '+d[1]));
   const df = {}; dT.forEach(ts=>new Set(ts).forEach(w=>df[w]=(df[w]||0)+1));
@@ -887,7 +934,7 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
     clearInterval(typing); ans.textContent = ''; let n = 0;
     typing = setInterval(()=>{ n += 2; ans.textContent = text.slice(0,n); if(n>=text.length) clearInterval(typing); }, reduce?0:18);
   }
-  ['What hardware has she built?','Is she looking for internships?','What did she do at IISc?','Any awards?','What does she do for fun?'].forEach(q=>{ const b = document.createElement('button'); b.textContent = q; b.onclick = ()=>{ inp.value = q; ask(q); }; $('#presets').appendChild(b); });
+  ['What hardware has she built?','What FPGA and RTL work has she done?','Is she looking for internships?','Any awards?','What does she do for fun?'].forEach(q=>{ const b = document.createElement('button'); b.textContent = q; b.onclick = ()=>{ inp.value = q; ask(q); }; $('#presets').appendChild(b); });
   $('#ragGo').onclick = ()=>ask(inp.value); inp.addEventListener('keydown', e=>{ if(e.key==='Enter') ask(inp.value); });
 })();
 
@@ -913,30 +960,37 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
     x.restore();
   }
   whenVisible(c, t=>{
+    const sm = phoneMQ.matches, cx = sm ? W*0.52 : camX, bE = sm ? W*0.76 : W*0.82;
     if(t-last > 1.7){ items.push({x:-40, type:types[ti++%types.length], seen:false, drop:0}); last = t; }
     x.fillStyle = '#141a16'; x.fillRect(0,0,W,H);
     // belt
-    x.fillStyle = '#262c28'; x.fillRect(0,beltY,W*0.82,30);
-    x.strokeStyle = '#3a423c'; x.lineWidth = 2; for(let k=0;k<30;k++){ const bx = ((k*34 + t*90)%(W*0.82)); x.beginPath(); x.moveTo(bx,beltY); x.lineTo(bx,beltY+30); x.stroke(); }
-    x.fillStyle = '#1b201c'; x.beginPath(); x.arc(14,beltY+15,15,0,7); x.arc(W*0.82-14,beltY+15,15,0,7); x.fill();
+    x.fillStyle = '#262c28'; x.fillRect(0,beltY,bE,30);
+    x.strokeStyle = '#3a423c'; x.lineWidth = 2; for(let k=0;k<30;k++){ const bx = ((k*34 + t*90)%bE); x.beginPath(); x.moveTo(bx,beltY); x.lineTo(bx,beltY+30); x.stroke(); }
+    x.fillStyle = '#1b201c'; x.beginPath(); x.arc(14,beltY+15,15,0,7); x.arc(bE-14,beltY+15,15,0,7); x.fill();
     // camera + fov
-    x.fillStyle = 'rgba(240,207,122,.07)'; x.beginPath(); x.moveTo(camX,70); x.lineTo(camX-60,beltY); x.lineTo(camX+60,beltY); x.fill();
-    x.fillStyle = '#2c3530'; x.fillRect(camX-26,40,52,32); x.fillStyle = '#0b0b0d'; x.beginPath(); x.arc(camX,72,10,0,7); x.fill();
-    x.fillStyle = '#7bd389'; x.beginPath(); x.arc(camX+18,48,3,0,7); x.fill();
-    x.fillStyle = '#8f8676'; x.font = '500 11px JetBrains Mono'; x.textAlign = 'center'; x.fillText('Arduino Uno Q · cam', camX, 30);
+    x.fillStyle = 'rgba(240,207,122,.07)'; x.beginPath(); x.moveTo(cx,70); x.lineTo(cx-60,beltY); x.lineTo(cx+60,beltY); x.fill();
+    x.fillStyle = '#2c3530'; x.fillRect(cx-26,40,52,32); x.fillStyle = '#0b0b0d'; x.beginPath(); x.arc(cx,72,10,0,7); x.fill();
+    x.fillStyle = '#7bd389'; x.beginPath(); x.arc(cx+18,48,3,0,7); x.fill();
+    x.fillStyle = '#8f8676'; x.font = '500 11px JetBrains Mono'; x.textAlign = 'center'; if(!sm) x.fillText('Arduino Uno Q · cam', cx, 30);
     // bins
-    ['COMPOST','RECYCLE','TRASH'].forEach((b,k)=>{ const bx = W*0.84, by = 120+k*95; x.fillStyle = clsCol[b]; x.globalAlpha = oled.cls===b ? 1 : .35; x.fillRect(bx, by, 100, 70); x.globalAlpha = 1; x.fillStyle = '#111613'; x.font = '600 12px JetBrains Mono'; x.fillText(b, bx+50, by+40); });
+    ['COMPOST','RECYCLE','TRASH'].forEach((b,k)=>{ const bw = sm ? 140 : 100, bh = sm ? 76 : 70, bx = sm ? W-14-bw : W*0.84, by = sm ? 112+k*98 : 120+k*95; x.fillStyle = clsCol[b]; x.globalAlpha = oled.cls===b ? 1 : .35; x.fillRect(bx, by, bw, bh); x.globalAlpha = 1; x.fillStyle = '#111613'; x.font = sm ? '600 24px JetBrains Mono' : '600 12px JetBrains Mono'; x.fillText(b, bx+bw/2, by+(sm?47:40)); });
     // items
     for(let i=items.length-1;i>=0;i--){ const it = items[i]; it.x += 90*0.016;
-      if(!it.seen && Math.abs(it.x-camX)<6){ it.seen = true; oled = {txt:it.type.n, cls:it.type.cls, conf:0.86+Math.random()*0.12, t}; }
-      if(it.x > W*0.82){ items.splice(i,1); continue; } drawItem(it);
-      if(Math.abs(it.x-camX)<60){ x.strokeStyle = '#f0cf7a'; x.lineWidth = 2; x.strokeRect(it.x-30, beltY-60, 60, 56); } }
+      if(!it.seen && Math.abs(it.x-cx)<6){ it.seen = true; oled = {txt:it.type.n, cls:it.type.cls, conf:0.86+Math.random()*0.12, t}; }
+      if(it.x > bE){ items.splice(i,1); continue; } drawItem(it);
+      if(Math.abs(it.x-cx)<60){ x.strokeStyle = '#f0cf7a'; x.lineWidth = sm ? 4 : 2; x.strokeRect(it.x-30, beltY-60, 60, 56); } }
     // oled
-    const ox = 30, oy = 40, ow = 250, oh = 110;
+    const ox = sm ? 24 : 30, oy = sm ? 88 : 40, ow = sm ? 300 : 250, oh = sm ? 112 : 110;
     x.fillStyle = '#05070a'; x.fillRect(ox,oy,ow,oh); x.strokeStyle = '#2c3530'; x.lineWidth = 6; x.strokeRect(ox,oy,ow,oh);
-    x.textAlign = 'left'; x.fillStyle = '#9fe8ff'; x.font = '500 12px JetBrains Mono'; x.fillText('OLED 128x64', ox+14, oy+22);
-    if(oled.cls){ x.font = '600 26px JetBrains Mono'; x.fillStyle = clsCol[oled.cls]; x.fillText(oled.cls, ox+14, oy+60); x.font = '500 12px JetBrains Mono'; x.fillStyle = '#9fe8ff'; x.fillText(`${oled.txt} · ${(oled.conf*100).toFixed(0)}%`, ox+14, oy+86); }
-    else { x.font = '600 26px JetBrains Mono'; x.fillStyle = '#9fe8ff'; x.fillText('READY', ox+14, oy+60); }
+    if(sm){
+      x.textAlign = 'left';
+      if(oled.cls){ x.font = '600 34px JetBrains Mono'; x.fillStyle = clsCol[oled.cls]; x.fillText(oled.cls, ox+16, oy+48); x.font = '500 21px JetBrains Mono'; x.fillStyle = '#9fe8ff'; x.fillText(`${oled.txt} · ${(oled.conf*100).toFixed(0)}%`, ox+16, oy+88); }
+      else { x.font = '600 34px JetBrains Mono'; x.fillStyle = '#9fe8ff'; x.fillText('READY', ox+16, oy+68); }
+    } else {
+      x.textAlign = 'left'; x.fillStyle = '#9fe8ff'; x.font = '500 12px JetBrains Mono'; x.fillText('OLED 128x64', ox+14, oy+22);
+      if(oled.cls){ x.font = '600 26px JetBrains Mono'; x.fillStyle = clsCol[oled.cls]; x.fillText(oled.cls, ox+14, oy+60); x.font = '500 12px JetBrains Mono'; x.fillStyle = '#9fe8ff'; x.fillText(`${oled.txt} · ${(oled.conf*100).toFixed(0)}%`, ox+14, oy+86); }
+      else { x.font = '600 26px JetBrains Mono'; x.fillStyle = '#9fe8ff'; x.fillText('READY', ox+14, oy+60); }
+    }
   });
 })();
 
@@ -953,22 +1007,34 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
   whenVisible(c, ()=>{
     const el = (performance.now()-t0)/1000, cur = Math.min(steps.length-1, Math.floor(el/0.55));
     if(el > steps.length*0.55 + 2.5) t0 = performance.now();
+    const sm = phoneMQ.matches;
     x.fillStyle = '#0b100d'; x.fillRect(0,0,W,H);
-    const ox = W*0.33, oy = H*0.52, R = H*0.4;
-    x.strokeStyle = 'rgba(212,168,75,.15)'; x.lineWidth = 1; x.beginPath(); x.moveTo(ox-R-20,oy); x.lineTo(ox+R+20,oy); x.moveTo(ox,oy-R-20); x.lineTo(ox,oy+R+20); x.stroke();
+    const ox = sm ? 168 : W*0.33, oy = sm ? 234 : H*0.52, R = sm ? 126 : H*0.4, ax = sm ? 10 : 20;
+    x.strokeStyle = 'rgba(212,168,75,.15)'; x.lineWidth = sm ? 2 : 1; x.beginPath(); x.moveTo(ox-R-ax,oy); x.lineTo(ox+R+ax,oy); x.moveTo(ox,oy-R-ax); x.lineTo(ox,oy+R+ax); x.stroke();
     x.strokeStyle = 'rgba(212,168,75,.35)'; x.beginPath(); x.arc(ox,oy,R,0,7); x.stroke();
-    const th = (+ang.value)*Math.PI/180; x.strokeStyle = 'rgba(123,211,137,.6)'; x.setLineDash([5,5]); x.beginPath(); x.moveTo(ox,oy); x.lineTo(ox+Math.cos(th)*R, oy-Math.sin(th)*R); x.stroke(); x.setLineDash([]);
+    const th = (+ang.value)*Math.PI/180; x.strokeStyle = 'rgba(123,211,137,.6)'; x.setLineDash(sm ? [9,8] : [5,5]); x.beginPath(); x.moveTo(ox,oy); x.lineTo(ox+Math.cos(th)*R, oy-Math.sin(th)*R); x.stroke(); x.setLineDash([]);
     for(let k=0;k<=cur;k++){ const s = steps[k], mag = Math.hypot(s.x,s.y), a = Math.atan2(s.y,s.x);
       const px = ox + Math.cos(a)*R, py = oy - Math.sin(a)*R; const last = k===cur;
-      x.strokeStyle = last ? '#f0cf7a' : `rgba(212,168,75,${0.15+0.5*k/steps.length})`; x.lineWidth = last?3:1.5;
-      x.beginPath(); x.moveTo(ox,oy); x.lineTo(px,py); x.stroke(); x.fillStyle = x.strokeStyle; x.beginPath(); x.arc(px,py,last?5:3,0,7); x.fill(); }
-    const s = steps[cur]; x.textAlign = 'left'; x.font = '500 13px JetBrains Mono'; const tx = W*0.66;
-    x.fillStyle = '#d4a84b'; x.fillText(cur===0 ? 'start: x = 1/K, y = 0' : `iteration ${s.i}: shift by 2^-${s.i}`, tx, 60);
-    x.fillStyle = '#cfc5b0';
-    x.fillText(`cos θ ≈ ${s.x.toFixed(5)}`, tx, 100); x.fillText(`sin θ ≈ ${s.y.toFixed(5)}`, tx, 124);
-    x.fillStyle = '#8f8676'; x.fillText(`true  ${Math.cos(th).toFixed(5)}`, tx, 158); x.fillText(`true  ${Math.sin(th).toFixed(5)}`, tx, 182);
-    x.fillStyle = '#7bd389'; x.fillText(`angle left: ${(s.z*180/Math.PI).toFixed(3)}°`, tx, 222);
-    x.fillStyle = '#8f8676'; x.font = '400 11.5px JetBrains Mono'; x.fillText('only shifts and adds,', tx, 270); x.fillText('no multipliers', tx, 288);
+      x.strokeStyle = last ? '#f0cf7a' : `rgba(212,168,75,${0.15+0.5*k/steps.length})`; x.lineWidth = sm ? (last?5:2.5) : (last?3:1.5);
+      x.beginPath(); x.moveTo(ox,oy); x.lineTo(px,py); x.stroke(); x.fillStyle = x.strokeStyle; x.beginPath(); x.arc(px,py,sm ? (last?8:5) : (last?5:3),0,7); x.fill(); }
+    const s = steps[cur]; x.textAlign = 'left';
+    if(sm){
+      const tx = 336; x.font = '500 24px JetBrains Mono';
+      x.fillStyle = '#d4a84b'; x.fillText(cur===0 ? 'start: x = 1/K, y = 0' : `step ${s.i}: shift by 2^-${s.i}`, tx, 118);
+      x.fillStyle = '#cfc5b0';
+      x.fillText(`cos θ ≈ ${s.x.toFixed(5)}`, tx, 158); x.fillText(`sin θ ≈ ${s.y.toFixed(5)}`, tx, 188);
+      x.fillStyle = '#8f8676'; x.fillText(`true  ${Math.cos(th).toFixed(5)}`, tx, 228); x.fillText(`true  ${Math.sin(th).toFixed(5)}`, tx, 258);
+      x.fillStyle = '#7bd389'; x.fillText(`angle left: ${(s.z*180/Math.PI).toFixed(3)}°`, tx, 300);
+      x.fillStyle = '#8f8676'; x.font = '400 20px JetBrains Mono'; x.fillText('only shifts and adds,', tx, 338); x.fillText('no multipliers', tx, 362);
+    } else {
+      x.font = '500 13px JetBrains Mono'; const tx = W*0.66;
+      x.fillStyle = '#d4a84b'; x.fillText(cur===0 ? 'start: x = 1/K, y = 0' : `iteration ${s.i}: shift by 2^-${s.i}`, tx, 60);
+      x.fillStyle = '#cfc5b0';
+      x.fillText(`cos θ ≈ ${s.x.toFixed(5)}`, tx, 100); x.fillText(`sin θ ≈ ${s.y.toFixed(5)}`, tx, 124);
+      x.fillStyle = '#8f8676'; x.fillText(`true  ${Math.cos(th).toFixed(5)}`, tx, 158); x.fillText(`true  ${Math.sin(th).toFixed(5)}`, tx, 182);
+      x.fillStyle = '#7bd389'; x.fillText(`angle left: ${(s.z*180/Math.PI).toFixed(3)}°`, tx, 222);
+      x.fillStyle = '#8f8676'; x.font = '400 11.5px JetBrains Mono'; x.fillText('only shifts and adds,', tx, 270); x.fillText('no multipliers', tx, 288);
+    }
     let html = '<tr><th>i</th><th>dir</th><th>x</th><th>y</th><th>angle left</th></tr>';
     steps.forEach((r,k)=>{ if(k===0) return; html += `<tr class="${k===cur?'on':''}"><td>${r.i}</td><td>${r.d}</td><td>${r.x.toFixed(4)}</td><td>${r.y.toFixed(4)}</td><td>${(r.z*180/Math.PI).toFixed(2)}°</td></tr>`; });
     if(tab._last !== cur+'|'+ang.value){ tab.innerHTML = html; tab._last = cur+'|'+ang.value; }
@@ -983,11 +1049,12 @@ function cmap(d){ d = Math.max(0,Math.min(1,d)); for(let i=1;i<inferno.length;i+
     x.fillStyle = '#0b100d'; x.fillRect(0,0,W,H);
     x.strokeStyle = 'rgba(181,83,42,.12)'; x.lineWidth = 1; for(let gx=0;gx<W;gx+=24){ x.beginPath(); x.moveTo(gx,0); x.lineTo(gx,H); x.stroke(); } for(let gy=0;gy<H;gy+=24){ x.beginPath(); x.moveTo(0,gy); x.lineTo(W,gy); x.stroke(); }
     const bpm = 72 + 4*Math.sin(t*0.3), period = 60/bpm, pxs = 160, head = (t*pxs)%W;
-    x.strokeStyle = '#e86a50'; x.lineWidth = 2.2; x.beginPath();
+    const sm = phoneMQ.matches;
+    x.strokeStyle = '#e86a50'; x.lineWidth = sm ? 4 : 2.2; x.beginPath();
     for(let px=0; px<W; px+=2){ const age = ((head - px)+W)%W; if(age > W-40) { x.moveTo(px, H*0.62); continue; } const tt = t - age/pxs; const ph = ((tt%period)+period)%period/period; const y = H*0.62 - beat(ph)*H*0.5; x.lineTo(px,y); }
     x.stroke();
-    x.fillStyle = '#e86a50'; x.font = '600 28px JetBrains Mono'; x.textAlign = 'right'; x.fillText(Math.round(bpm)+' bpm', W-20, 78);
-    const ph = ((t%period)+period)%period/period; x.font = '30px serif'; x.globalAlpha = ph>0.38&&ph<0.5?1:.5; x.fillText('♥', W-20, 116); x.globalAlpha = 1;
+    x.fillStyle = '#e86a50'; x.font = sm ? '600 36px JetBrains Mono' : '600 28px JetBrains Mono'; x.textAlign = 'right'; x.fillText(Math.round(bpm)+' bpm', W-20, sm ? 126 : 78);
+    const ph = ((t%period)+period)%period/period; x.font = sm ? '38px serif' : '30px serif'; x.globalAlpha = ph>0.38&&ph<0.5?1:.5; x.fillText('♥', W-20, sm ? 170 : 116); x.globalAlpha = 1;
   });
 })();
 
@@ -1053,10 +1120,10 @@ end koluvu steps */
 (function(){
   const P = {
     depth:{meta:'IISc Bangalore · 2023, then SJSU · 2026',title:'Monocular depth estimation',lead:'Recovering depth from a single camera image, the kind of perception that lets a cheap sensor understand distance. I started on the model side at IISc and took it all the way onto an FPGA at SJSU.',stats:[['85.81%','IISc test accuracy'],['4.02 ms','FPGA layer, incl. DMA'],['11.7×','faster than ARM NEON'],['0','mismatches, bit-exact']],secs:[['At IISc · the model',['A U-Net with a DenseNet-201 encoder for single-image depth estimation','85.81% test accuracy, above the 85% published benchmark']],['At SJSU · onto the FPGA',['FastDepth (MobileNet encoder, NYU Depth v2) on a Digilent Zybo Z7-10 (Zynq-7000)','First convolution layer as a streaming, line-buffered INT8 kernel in Vitis HLS, with AXI DMA in a Vivado block design','4.02 ms on the board including DMA: 11.7× faster than ARM NEON INT8 and 38.8× faster than scalar FP32','Bit-exact: 0 of 401,408 outputs differ from the ARM INT8 golden model; 29.1 dB SQNR against FP32','Timing met at 100 MHz using 63 of 80 DSPs. INT16 at the same parallelism would need 108 DSPs, which is why INT8 went to the board']],['The precision study',['FP32, INT16, INT8 and mixed precision compared on NYU Depth v2 (654 test images)','INT16 matched FP32 exactly; INT8 cost some accuracy (RMSE 0.604 to 0.723 m)','Judged by a stopping-distance brake model too: mixed precision beat INT8 on RMSE yet missed more brake decisions (39 vs 29), so precision should be chosen against the task, not just the benchmark']]],stack:['U-Net','DenseNet-201','FastDepth','PyTorch','Vitis HLS','Vivado','AXI DMA','Zynq-7000','INT8 / INT16'],link:['Code, reports and board results on GitHub','https://github.com/SindhuraKuchibhotla/fastdepth-zynq-fixedpoint']},
-    detect:{meta:'Published paper',title:'Real-time object detection',lead:'Research on detecting objects fast enough to act on, where latency matters as much as accuracy.',secs:[['Why it matters',['On a car, a robot or a camera, a detection that arrives late is a detection that missed','The confidence threshold is where you trade false alarms against missed objects, which is what the demo lets you feel']]],stack:['Object detection','Computer vision','Real-time systems'],note:'Paper title, venue and link coming soon.'},
-    hyper:{meta:'MTech thesis · Jain University · Gold Medalist',title:'Hyperspectral image reconstruction',lead:'Reconstructing images across many narrow spectral bands, far beyond the red, green and blue a normal camera sees.',secs:[['Why it matters',['Hyperspectral data reveals material properties invisible to the eye, with uses from agriculture to medical imaging','Reconstructing it computationally makes that information cheaper to capture']],['Recognition',['Gold Medalist in an AICTE-funded MTech in Data Science']]],stack:['Spectral imaging','Deep learning','Reconstruction'],note:'More detail coming soon.'},
+    detect:{meta:'Published paper',title:'Real-time object detection',lead:'Research on detecting objects fast enough to act on, where latency matters as much as accuracy.',secs:[['Why it matters',['On a car, a robot or a camera, a detection that arrives late is a detection that missed','The confidence threshold is where you trade false alarms against missed objects, which is what the demo lets you feel']]],stack:['Object detection','Computer vision','Real-time systems']},
+    hyper:{meta:'MTech thesis · Jain University · Gold Medalist',title:'Hyperspectral image reconstruction',lead:'Reconstructing images across many narrow spectral bands, far beyond the red, green and blue a normal camera sees.',secs:[['Why it matters',['Hyperspectral data reveals material properties invisible to the eye, with uses from agriculture to medical imaging','Reconstructing it computationally makes that information cheaper to capture']],['Recognition',['Gold Medalist in an AICTE-funded MTech in Data Science']]],stack:['Spectral imaging','Deep learning','Reconstruction']},
     caprus:{meta:'CaprusIT · AI & ML Developer · Mar 2023 to May 2026 · Hyderabad',title:'Production AI at CaprusIT',lead:'I designed and deployed production AI across mental wellness, AI-driven media and aviation, and mentored the interns and freshers who joined us.',secs:[['Menthra · AI mental wellness',['LLM-based therapy chat with RAG personalisation','NLP modules for emotion analysis and intent detection','Talking avatars via HeyGen, text-to-speech via ElevenLabs, speech-to-text via Whisper','Deployed on Azure']],['Aauti · AI avatar marketplace',['The avatar video generation pipeline, using computer vision and HeyGen','Voice cloning R&D with Wav2Lip lip-sync','A modular microservice architecture']],['EmpowerMX · aviation maintenance (MRO)',['ML pipelines using BERT embeddings for maintenance records','Clustering, classification and recommendation models','Production inference on AWS SageMaker, ECS, S3 and EventBridge']],['Mentoring',['Trained interns and freshers on ML pipelines, backend systems and production workflows']]],stack:['Python','PyTorch','TensorFlow','FastAPI','LangChain','Azure','AWS','Docker']},
-    waste:{meta:'Embedded World North America · Anaheim · Sep 2026',title:'Machine-vision waste sorter',lead:'I led a team of four to runner-up in the ASUS-sponsored Sustainability Challenge: a vision system that sorts waste on a conveyor, built in two days.',stats:[['2nd','of 12 teams'],['83.3%','test accuracy'],['7','material classes'],['2 days','to build']],secs:[['What we built',['A MobileNetV3-Small classifier deployed through ONNX Runtime on the Qualcomm QRB2210-based Arduino UNO Q','Seven material classes, routed to compost, recycling or trash','Trained on RealWaste and TrashNet, mixed with our own validation data','Linux-side Python inference integrated with the STM32U585 firmware','An OLED display driver ported to the board\'s Zephyr-based core, so every decision shows on screen']],['The constraint',['The conveyor had a DC motor but no servo, so nothing could push an item into a bin. We put everything into getting the classification right and making the call obvious on the display','Next version: an actuator']]],stack:['MobileNetV3','ONNX Runtime','Arduino UNO Q','App Lab','STM32U585','Zephyr','Python']},
+    waste:{meta:'Embedded World North America · Anaheim · Sep 2026',title:'Machine-vision waste sorter',lead:'I led a team of four to runner-up in the ASUS-sponsored Sustainability Challenge: a vision system that sorts waste on a conveyor, built in two days.',stats:[['Runner-up','Sustainability track'],['12','teams at the event'],['83.3%','test accuracy'],['7','material classes']],secs:[['What we built',['A MobileNetV3-Small classifier deployed through ONNX Runtime on the Qualcomm QRB2210-based Arduino UNO Q','Seven material classes, routed to compost, recycling or trash','Trained on RealWaste and TrashNet, mixed with our own validation data','Linux-side Python inference integrated with the STM32U585 firmware','An OLED display driver ported to the board\'s Zephyr-based core, so every decision shows on screen']],['The constraint',['The conveyor had a DC motor but no servo, so nothing could push an item into a bin. We put everything into getting the classification right and making the call obvious on the display','Next version: an actuator']]],stack:['MobileNetV3','ONNX Runtime','Arduino UNO Q','App Lab','STM32U585','Zephyr','Python']},
     cordic:{meta:'SJSU EE 271 · team of four · Sep 2026 to now',title:'Pipelined fixed-point CORDIC engine',lead:'A parameterized, pipelined CORDIC engine in SystemVerilog for field-oriented motor control. It turns stationary-frame components and rotor angle into motor-aligned d/q components using only shifts and adds.',secs:[['My piece',['The parameterized barrel shifter that performs every 2⁻ⁱ shift']],['The project',['Configurable word width and pipeline depth','Synthesis of several configurations to compare accuracy, latency, clock frequency and resource use','Verification with a self-checking testbench against a software reference model']],['Why it matters',['Motor controllers run these transforms continuously. CORDIC does trigonometry without multipliers: give up a little precision, win area, power and clock speed']]],stack:['SystemVerilog','Fixed-point','Pipelining','Verification']},
     cardy:{meta:'GVP College of Engineering · BTech · Dec 2018 to Apr 2019',title:'Cardy Heart',lead:'A solar-powered biomedical wearable that tracks heart signals, pulse and motion, and alerts a phone when something looks wrong.',secs:[['What we built',['Integrated AD8232 ECG, pulse-rate and ADXL335 accelerometer sensors','Read them through an MCP3008 SPI ADC, with a 0.96-inch I²C OLED display','Ran it all on a solar-powered Raspberry Pi']],['My part',['Led the team of four','Wrote the acquisition firmware, the alerts and the Android communication']],['Next',['Taking it from prototype wiring to a custom PCB']]],stack:['Raspberry Pi','AD8232 ECG','ADXL335','MCP3008','SPI','I²C','Android']}
   };
@@ -1065,7 +1132,7 @@ end koluvu steps */
     const d = P[b.dataset.rm]; if(!d) return;
     $('#mMeta').textContent = d.meta; $('#mTitle').textContent = d.title;
     let h = `<p>${esc(d.lead)}</p>`;
-    if(d.stats) h += `<div class="stats">${d.stats.map(s=>`<div><b>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join('')}</div>`;
+    if(d.stats) h += `<div class="stats">${d.stats.map(s=>`<div><b${s[0].length>7?' class="long"':''}>${esc(s[0])}</b><span>${esc(s[1])}</span></div>`).join('')}</div>`;
     d.secs.forEach(([t,items])=>{ h += `<h4>${esc(t)}</h4><ul>${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul>`; });
     h += `<h4>Tools</h4><div class="rchips">${d.stack.map(s=>`<span>${esc(s)}</span>`).join('')}</div>`;
     if(d.link) h += `<h4>See the work</h4><p><a href="${d.link[1]}" target="_blank" rel="noopener" style="color:var(--rust)">${esc(d.link[0])} ↗</a></p>`;
